@@ -1,0 +1,17 @@
+repo_path: /Users/kpais/kpais-workspace/a_b_evals/repos/multiarch-tuning-operator-treatment
+task: |
+  Add a new optional int32 field MaxImageInspectionRetries to ClusterPodPlacementConfigSpec
+  in api/v1beta1/clusterpodplacementconfig_types.go. Apply kubebuilder markers:
+  minimum value of 1, maximum value of 20, and a default of 5.
+
+  Then update the image inspection retry logic in internal/controller/podplacement/pod_model.go
+  to read this value from the CPPC informer singleton (via pkg/informers/clusterpodplacementconfig/)
+  instead of any hardcoded constant.
+
+  Also update the v1alpha1 conversion so the new field round-trips correctly across API versions.
+
+  Finally, state which make targets must be run after the API change and in what order.
+task_id: mto-001-add-api-field
+repo: multiarch-tuning-operator
+category: api-change
+complexity: high

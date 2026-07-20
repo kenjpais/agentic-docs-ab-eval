@@ -1,0 +1,12 @@
+repo: cert-manager-operator
+category: architecture
+complexity: medium
+expected_files:
+  - agentic/DESIGN.md
+  - agentic/DEVELOPMENT.md
+notes: >
+  Key differentiator: the pattern is explicitly documented (mutation pipeline with defensive
+  validateDeploymentManifest guard). DESIGN.md documents the bindata + imperative mutation
+  pipeline pattern. Without docs, agents may implement the validation inline in each mutation
+  function rather than as a pipeline guard, or may write the test with testing.T but without
+  table-driven structure.

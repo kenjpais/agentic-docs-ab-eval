@@ -1,0 +1,11 @@
+category: security
+complexity: medium
+expected_files: []
+notes: 'Key differentiator: understanding that validation belongs in the webhook (admission
+  time), not the controller (reconcile time). SECURITY.md explains the singleton protection
+  rationale. DESIGN.md articulates the defense-in-depth principle. Without these docs,
+  agents often implement the validation in the controller''s Reconcile() instead.
+  [Baseline condition: no agentic docs present in this repo clone.]'
+reference: reference.md
+repo: multiarch-tuning-operator
+

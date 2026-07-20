@@ -1,0 +1,12 @@
+category: architecture
+complexity: high
+expected_files: []
+notes: 'Key differentiator: the OptionalInformer pattern with Applicable() guard.
+  Without docs, agents typically call the informer unconditionally (missing the Applicable()
+  guard) or reinvent the discovery logic rather than using InitInformerIfAvailable[T].
+  DESIGN.md documents the optional informer pattern and its rationale (MicroShift
+  compatibility). High complexity: multi-file changes with generic type wiring. [Baseline
+  condition: no agentic docs present in this repo clone.]'
+reference: reference.md
+repo: cert-manager-operator
+

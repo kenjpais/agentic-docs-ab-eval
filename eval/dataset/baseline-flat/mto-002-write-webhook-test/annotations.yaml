@@ -1,0 +1,11 @@
+category: test-writing
+complexity: medium
+expected_files: []
+notes: 'Key differentiators: fluent builder API (pkg/testing/builder) vs raw struct
+  literals, Ginkgo BDD structure vs t.Run, awareness that system namespace exclusion
+  is a security control (not just a default). Without TESTING.md, agents typically
+  write raw struct literals. [Baseline condition: no agentic docs present in this
+  repo clone.]'
+reference: reference.md
+repo: multiarch-tuning-operator
+

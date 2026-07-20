@@ -1,0 +1,303 @@
+{
+  "exit_code": 0,
+  "duration_s": 1866.7,
+  "wall_clock_s": 996.7,
+  "cost_usd": 8.47,
+  "token_usage": {
+    "input": 30736,
+    "output": 94629,
+    "cache_read": 5901069,
+    "cache_create": 480690
+  },
+  "num_turns": 117,
+  "per_model_usage": {
+    "claude-opus-4-6": {
+      "input": 30736,
+      "output": 94629,
+      "cache_read": 5901069,
+      "cache_create": 480690,
+      "cost_usd": 8.474252
+    }
+  },
+  "per_model_turns": {
+    "claude-opus-4-6": 117
+  },
+  "num_cases": 11,
+  "model": "claude-opus-4-6",
+  "agent": "claude-code",
+  "agent_version": "2.1.210 (Claude Code)",
+  "execution_mode": "case",
+  "eval_params": {
+    "execution_mode": "case",
+    "max_budget_usd": 3.0,
+    "timeout_s": 1800,
+    "skill_args": "You are a Go engineer working on a Kubernetes operator.\nThe repository is located at {{ input.repo_path }}.\nChange your working directory to that repository before beginning.\n\nTask:\n{{ input.task }}\n\nProduce a complete implementation. Include:\n- All files that must be modified with the exact changes\n- Any make targets or commands to run and in what order\n- The complete code for any new files or functions\n",
+    "effort": "high"
+  },
+  "per_case": {
+    "cm-001-certmanager-cel": {
+      "exit_code": 0,
+      "duration_s": 42.7,
+      "token_usage": {
+        "input": 3973,
+        "output": 1289,
+        "cache_read": 102571,
+        "cache_create": 41395
+      },
+      "cost_usd": 0.36209424999999995,
+      "num_turns": 4,
+      "per_model_usage": {
+        "claude-opus-4-6": {
+          "input": 3973,
+          "output": 1289,
+          "cache_read": 102571,
+          "cache_create": 41395,
+          "cost_usd": 0.36209424999999995
+        }
+      },
+      "per_model_turns": {
+        "claude-opus-4-6": 4
+      }
+    },
+    "cm-003-optional-informer": {
+      "exit_code": 0,
+      "duration_s": 257.6,
+      "token_usage": {
+        "input": 1784,
+        "output": 14931,
+        "cache_read": 669257,
+        "cache_create": 49801
+      },
+      "cost_usd": 1.02807975,
+      "num_turns": 13,
+      "per_model_usage": {
+        "claude-opus-4-6": {
+          "input": 1784,
+          "output": 14931,
+          "cache_read": 669257,
+          "cache_create": 49801,
+          "cost_usd": 1.02807975
+        }
+      },
+      "per_model_turns": {
+        "claude-opus-4-6": 13
+      }
+    },
+    "cm-004-immutable-field": {
+      "exit_code": 0,
+      "duration_s": 68.0,
+      "token_usage": {
+        "input": 8,
+        "output": 2808,
+        "cache_read": 236169,
+        "cache_create": 28464
+      },
+      "cost_usd": 0.3662245,
+      "num_turns": 6,
+      "per_model_usage": {
+        "claude-opus-4-6": {
+          "input": 8,
+          "output": 2808,
+          "cache_read": 236169,
+          "cache_create": 28464,
+          "cost_usd": 0.3662245
+        }
+      },
+      "per_model_turns": {
+        "claude-opus-4-6": 6
+      }
+    },
+    "cm-002-validate-manifest": {
+      "exit_code": 0,
+      "duration_s": 433.3,
+      "token_usage": {
+        "input": 4349,
+        "output": 22858,
+        "cache_read": 899343,
+        "cache_create": 104436
+      },
+      "cost_usd": 1.6955915,
+      "num_turns": 12,
+      "per_model_usage": {
+        "claude-opus-4-6": {
+          "input": 4349,
+          "output": 22858,
+          "cache_read": 899343,
+          "cache_create": 104436,
+          "cost_usd": 1.6955915
+        }
+      },
+      "per_model_turns": {
+        "claude-opus-4-6": 12
+      }
+    },
+    "mto-001-add-api-field": {
+      "exit_code": 0,
+      "duration_s": 107.4,
+      "token_usage": {
+        "input": 10,
+        "output": 5422,
+        "cache_read": 348419,
+        "cache_create": 36482
+      },
+      "cost_usd": 0.537822,
+      "num_turns": 8,
+      "per_model_usage": {
+        "claude-opus-4-6": {
+          "input": 10,
+          "output": 5422,
+          "cache_read": 348419,
+          "cache_create": 36482,
+          "cost_usd": 0.537822
+        }
+      },
+      "per_model_turns": {
+        "claude-opus-4-6": 8
+      }
+    },
+    "cm-005-hash-triggered-restart": {
+      "exit_code": 0,
+      "duration_s": 263.8,
+      "token_usage": {
+        "input": 20040,
+        "output": 15857,
+        "cache_read": 684765,
+        "cache_create": 93875
+      },
+      "cost_usd": 1.42572625,
+      "num_turns": 11,
+      "per_model_usage": {
+        "claude-opus-4-6": {
+          "input": 20040,
+          "output": 15857,
+          "cache_read": 684765,
+          "cache_create": 93875,
+          "cost_usd": 1.42572625
+        }
+      },
+      "per_model_turns": {
+        "claude-opus-4-6": 11
+      }
+    },
+    "mto-003-add-metric": {
+      "exit_code": 0,
+      "duration_s": 71.7,
+      "token_usage": {
+        "input": 81,
+        "output": 3651,
+        "cache_read": 162465,
+        "cache_create": 15128
+      },
+      "cost_usd": 0.2674625,
+      "num_turns": 5,
+      "per_model_usage": {
+        "claude-opus-4-6": {
+          "input": 81,
+          "output": 3651,
+          "cache_read": 162465,
+          "cache_create": 15128,
+          "cost_usd": 0.2674625
+        }
+      },
+      "per_model_turns": {
+        "claude-opus-4-6": 5
+      }
+    },
+    "mto-004-webhook-validation": {
+      "exit_code": 0,
+      "duration_s": 82.4,
+      "token_usage": {
+        "input": 9,
+        "output": 4262,
+        "cache_read": 245444,
+        "cache_create": 21343
+      },
+      "cost_usd": 0.36271075,
+      "num_turns": 7,
+      "per_model_usage": {
+        "claude-opus-4-6": {
+          "input": 9,
+          "output": 4262,
+          "cache_read": 245444,
+          "cache_create": 21343,
+          "cost_usd": 0.36271075
+        }
+      },
+      "per_model_turns": {
+        "claude-opus-4-6": 7
+      }
+    },
+    "mto-005-promql-alert": {
+      "exit_code": 0,
+      "duration_s": 63.4,
+      "token_usage": {
+        "input": 433,
+        "output": 2332,
+        "cache_read": 203372,
+        "cache_create": 16818
+      },
+      "cost_usd": 0.2672635,
+      "num_turns": 6,
+      "per_model_usage": {
+        "claude-opus-4-6": {
+          "input": 433,
+          "output": 2332,
+          "cache_read": 203372,
+          "cache_create": 16818,
+          "cost_usd": 0.2672635
+        }
+      },
+      "per_model_turns": {
+        "claude-opus-4-6": 6
+      }
+    },
+    "mto-002-write-webhook-test": {
+      "exit_code": 0,
+      "duration_s": 329.3,
+      "token_usage": {
+        "input": 39,
+        "output": 12292,
+        "cache_read": 2049619,
+        "cache_create": 49800
+      },
+      "cost_usd": 1.6435545000000003,
+      "num_turns": 37,
+      "per_model_usage": {
+        "claude-opus-4-6": {
+          "input": 39,
+          "output": 12292,
+          "cache_read": 2049619,
+          "cache_create": 49800,
+          "cost_usd": 1.6435545000000003
+        }
+      },
+      "per_model_turns": {
+        "claude-opus-4-6": 37
+      }
+    },
+    "mto-006-new-execution-mode": {
+      "exit_code": 0,
+      "duration_s": 147.1,
+      "token_usage": {
+        "input": 10,
+        "output": 8927,
+        "cache_read": 299645,
+        "cache_create": 23148
+      },
+      "cost_usd": 0.5177225000000001,
+      "num_turns": 8,
+      "per_model_usage": {
+        "claude-opus-4-6": {
+          "input": 10,
+          "output": 8927,
+          "cache_read": 299645,
+          "cache_create": 23148,
+          "cost_usd": 0.5177225000000001
+        }
+      },
+      "per_model_turns": {
+        "claude-opus-4-6": 8
+      }
+    }
+  }
+}

@@ -1,0 +1,127 @@
+name: agentic-docs-ab-eval
+description: A/B evaluation — TREATMENT v2 (guided AGENTS.md discovery, simulating Claude Code auto-load)
+
+execution:
+  mode: case
+  prompt: |
+    You are a Go engineer working on a Kubernetes operator.
+    The repository is located at {{ input.repo_path }}.
+    Change your working directory to that repository before beginning.
+
+    Task:
+    {{ input.task }}
+
+    Produce a complete implementation. Include:
+    - All files that must be modified with the exact changes
+    - Any make targets or commands to run and in what order
+    - The complete code for any new files or functions
+  timeout: 1800
+  max_budget_usd: 3.00
+  parallelism: 2
+
+runner:
+  type: claude-code
+  effort: high
+  system_prompt: |
+    This repository has agentic documentation. Before beginning any task, read
+    AGENTS.md in the repository root — it maps components and workflows. Then
+    read any referenced agentic/ documents relevant to your task (e.g.,
+    agentic/DESIGN.md, agentic/DEVELOPMENT.md, agentic/TESTING.md,
+    agentic/RELIABILITY.md, agentic/SECURITY.md).
+
+    Use the Read tool to read files from the repository. Do not use the Agent tool
+    or spawn subagents. Complete the task yourself in this conversation.
+    After reading the relevant files, produce your complete implementation as text
+    in your final response: exact file paths, the full changed code, and any
+    commands to run. Do not write or edit files — output the implementation as text.
+  permissions:
+    allow:
+      - "Read"
+      - "Bash"
+      - "Grep"
+      - "Glob"
+
+models:
+  skill: claude-opus-4-6
+  judge: claude-opus-4-6
+  subagent: claude-sonnet-4-6
+
+mlflow:
+  tracking_uri: sqlite:///mlflow.db
+  experiment: agentic-docs-ab-eval
+  tags:
+    condition: treatment-v2
+    repo: "{{ input.repo }}"
+    category: "{{ input.category }}"
+    complexity: "{{ input.complexity }}"
+    task_id: "{{ input.task_id }}"
+  params:
+    condition: treatment-v2
+    model: claude-opus-4-6
+    effort: high
+    parallelism: "2"
+    agentic_docs_quality_score_cm: "85"
+    agentic_docs_quality_score_mto: "84"
+    treatment_variant: guided_discovery
+
+traces:
+  stdout: true
+  stderr: true
+  metrics: true
+  events: true
+
+dataset:
+  path: eval/dataset/treatment-flat
+  schema: |
+    Each case directory contains:
+    - input.yaml: fields 'repo_path' (path to treatment repo clone with full agentic docs),
+      'task' (the implementation task description), 'repo', 'category', 'complexity',
+      'task_id' (forwarded from annotations.yaml for MLflow tag forwarding)
+    - reference.md: gold-standard implementation notes describing the correct approach,
+      files to modify, conventions to follow, and score-5 criteria
+    - annotations.yaml: metadata with repo, category, complexity, expected_docs_consulted
+
+judges:
+  - name: task_success
+    description: Did the agent produce a complete implementation addressing all task requirements?
+    prompt_file: eval/judges/task-success.md
+
+  - name: code_correctness
+    description: Is the implementation type-correct with real APIs and no invented methods?
+    prompt_file: eval/judges/code-correctness.md
+
+  - name: convention_adherence
+    description: Does the implementation follow repository-specific conventions?
+    prompt_file: eval/judges/convention-adherence.md
+
+  - name: hallucination_check
+    description: Does the agent invent non-existent packages, methods, or file paths?
+    prompt_file: eval/judges/hallucination-check.md
+
+  - name: efficiency
+    description: Did the agent complete the task without excessive turns or cost?
+    check: |
+      # outputs contains per-run totals (all cases combined)
+      turns = outputs.get("num_turns", 999)
+      cost = outputs.get("cost_usd", 999.0)
+      if turns > 200 or cost > 15.0:
+          return False, f"Excessive: {turns} turns, ${cost:.2f}"
+      return True, f"Efficient: {turns} turns, ${cost:.2f}"
+
+  - name: consulted_docs
+    builtin: consulted_docs
+    arguments:
+      min_coverage: 0.5
+      match: suffix
+
+thresholds:
+  task_success:
+    min_mean: 3.0
+  code_correctness:
+    min_mean: 3.0
+  convention_adherence:
+    min_mean: 3.0
+  hallucination_check:
+    min_mean: 3.0
+  consulted_docs:
+    min_pass_rate: 0.5

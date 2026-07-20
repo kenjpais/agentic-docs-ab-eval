@@ -1,0 +1,10 @@
+category: api-change
+complexity: high
+expected_files: []
+notes: 'Key differentiators: make target ordering (manifests before generate), use
+  of informer singleton rather than direct API call, pointer type for optional field.
+  Without agentic docs, agents typically combine make targets or use direct API calls.
+  [Baseline condition: no agentic docs present in this repo clone.]'
+reference: reference.md
+repo: multiarch-tuning-operator
+

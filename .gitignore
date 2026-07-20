@@ -1,0 +1,27 @@
+# Cloned repositories — too large to include
+repos/
+
+# MLflow binary database and run data
+mlflow.db
+mlruns/
+
+# Per-case agent transcripts — large and sensitive
+eval/runs/*/cases/
+
+# Temporary harness state
+tmp/
+
+# Claude Code local settings
+.claude/
+
+# Python artifacts
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# OS
+.DS_Store
+
+# Jupyter checkpoints
+.ipynb_checkpoints/

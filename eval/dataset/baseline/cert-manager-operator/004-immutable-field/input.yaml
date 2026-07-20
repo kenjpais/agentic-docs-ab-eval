@@ -1,0 +1,15 @@
+repo_path: /Users/kpais/kpais-workspace/a_b_evals/repos/cert-manager-operator-baseline
+task: |
+  Add a tlsMinVersion field to IstioCSRConfig in api/operator/v1alpha1/istiocsr_types.go.
+  Apply two CEL validation rules:
+  1. Presence-immutability: once set, the field cannot be removed; once unset, it cannot be added
+  2. Value-immutability: self == oldSelf when the field is set
+
+  Add an enum constraint restricting valid values to VersionTLS12 and VersionTLS13.
+
+  Update the mutation pipeline in pkg/controller/istiocsr/deployments.go to pass the
+  value as a --tls-min-version flag to the IstioCSR container.
+task_id: 004-immutable-field
+repo: cert-manager-operator
+category: api-change
+complexity: high

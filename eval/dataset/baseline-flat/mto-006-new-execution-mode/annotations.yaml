@@ -1,0 +1,11 @@
+category: architecture
+complexity: high
+expected_files: []
+notes: 'Key differentiators: unique leader election ID per mode (not shared), mutual
+  exclusion in bindFlags, CPPC informer started before manager. Without DESIGN.md
+  which documents the leader election ID pattern and rationale, agents often omit
+  the leader election ID or reuse an existing one. High complexity due to multi-file
+  changes. [Baseline condition: no agentic docs present in this repo clone.]'
+reference: reference.md
+repo: multiarch-tuning-operator
+

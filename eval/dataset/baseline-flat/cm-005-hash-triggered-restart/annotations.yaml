@@ -1,0 +1,12 @@
+category: architecture
+complexity: high
+expected_files: []
+notes: 'Key differentiator: hash the PEM content (not resourceVersion), idempotency
+  guard, annotation on pod template (not Deployment). DESIGN.md documents the hash-annotation
+  pattern and WHY (avoid unnecessary restarts on metadata-only ConfigMap updates).
+  Without docs, agents commonly hash resourceVersion (simpler but wrong) or forget
+  the idempotency guard, or place the annotation on the Deployment instead of pod
+  template. [Baseline condition: no agentic docs present in this repo clone.]'
+reference: reference.md
+repo: cert-manager-operator
+

@@ -1,0 +1,12 @@
+category: api-change
+complexity: medium
+expected_files: []
+notes: 'Key differentiator: singleton enforcement pattern (CEL XValidation at API
+  admission time, not controller logic). DESIGN.md documents the singleton pattern
+  and the gap in CertManager. Without this, agents may try to add controller-side
+  validation or use a webhook instead. The CEL marker syntax is non-obvious; agents
+  without docs often get the syntax wrong. [Baseline condition: no agentic docs present
+  in this repo clone.]'
+reference: reference.md
+repo: cert-manager-operator
+

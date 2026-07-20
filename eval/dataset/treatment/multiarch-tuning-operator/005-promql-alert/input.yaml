@@ -1,0 +1,11 @@
+repo_path: /Users/kpais/kpais-workspace/a_b_evals/repos/multiarch-tuning-operator-treatment
+task: |
+  Write a PrometheusRule Kubernetes custom resource YAML file to be placed under
+  config/monitoring/. Define an alert named MultiarchImageInspectionFailureRateCritical
+  that fires when the image inspection failure rate exceeds the SLO threshold over the
+  defined measurement window. Use the existing Prometheus metric counters in this
+  repository. Include the expr, a severity label, and a human-readable annotations.message.
+task_id: 005-promql-alert
+repo: multiarch-tuning-operator
+category: observability
+complexity: low

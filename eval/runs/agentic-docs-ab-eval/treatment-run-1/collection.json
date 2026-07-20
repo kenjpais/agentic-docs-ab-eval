@@ -1,0 +1,35 @@
+{
+  "cm-001-certmanager-cel": {
+    "_modified": 2
+  },
+  "cm-002-validate-manifest": {
+    "_modified": 2
+  },
+  "cm-003-optional-informer": {
+    "_modified": 2
+  },
+  "cm-004-immutable-field": {
+    "_modified": 2
+  },
+  "cm-005-hash-triggered-restart": {
+    "_modified": 2
+  },
+  "mto-001-add-api-field": {
+    "_modified": 2
+  },
+  "mto-002-write-webhook-test": {
+    "_modified": 2
+  },
+  "mto-003-add-metric": {
+    "_modified": 2
+  },
+  "mto-004-webhook-validation": {
+    "_modified": 2
+  },
+  "mto-005-promql-alert": {
+    "_modified": 2
+  },
+  "mto-006-new-execution-mode": {
+    "_modified": 2
+  }
+}

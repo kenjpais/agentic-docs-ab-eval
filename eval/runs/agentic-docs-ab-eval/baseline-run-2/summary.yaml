@@ -1,0 +1,1839 @@
+judges:
+  code_correctness:
+    mean: 3.727272727272727
+    pass_rate: null
+  consulted_docs:
+    mean: 1.0
+    pass_rate: 1.0
+  convention_adherence:
+    mean: 3.727272727272727
+    pass_rate: null
+  efficiency:
+    mean: 0.0
+    pass_rate: 0.0
+  hallucination_check:
+    mean: 3.1818181818181817
+    pass_rate: null
+  task_success:
+    mean: 3.8181818181818183
+    pass_rate: null
+per_case:
+  cm-001-certmanager-cel:
+    code_correctness:
+      judge_type: llm
+      rationale: 'The agent''s implementation is fully correct:
+
+
+        1. **Correct XValidation marker syntax**: `// +kubebuilder:validation:XValidation:rule="self.metadata.name
+        == ''cluster''",message="CertManager is a singleton, .metadata.name must be
+        ''cluster''"` — this exactly matches the kubebuilder marker format.
+
+
+        2. **CEL rule uses correct syntax**: `self.metadata.name == ''cluster''` with
+        single quotes around `''cluster''`, matching CEL string literal syntax and
+        the existing TrustManager pattern.
+
+
+        3. **Marker placement**: The marker is placed in the comment block directly
+        above the `type CertManager struct` declaration, which is the correct position
+        for kubebuilder type-level markers. The agent verified this matches the TrustManager
+        pattern at line 39 of `trustmanager_types.go`.
+
+
+        4. **Message text consistency**: The message `"CertManager is a singleton,
+        .metadata.name must be ''cluster''"` follows the exact same pattern as TrustManager''s
+        message `"TrustManager is a singleton, .metadata.name must be ''cluster''"`,
+        just with the type name changed.
+
+
+        5. **Make target**: `make manifests` is correctly identified as the command
+        to regenerate CRD manifests, and the agent verified the Makefile contains
+        this target.
+
+
+        6. **No invented APIs, no type errors, no incorrect imports**: The change
+        is purely a comment/marker addition with no Go code changes beyond the marker
+        line. The existing struct definition is preserved exactly as-is.'
+      value: 5
+    consulted_docs:
+      judge_type: builtin
+      rationale: Read 0/2 expected docs (coverage 0%, threshold 0%)
+      value: true
+    convention_adherence:
+      judge_type: llm
+      rationale: 'The agent''s implementation is fully idiomatic and follows all applicable
+        conventions:
+
+
+        1. **Correct XValidation marker syntax**: Uses `+kubebuilder:validation:XValidation:rule="...",message="..."`
+        exactly as required.
+
+        2. **CEL rule**: Uses `self.metadata.name == ''cluster''` with single quotes
+        around ''cluster'', matching the TrustManager pattern.
+
+        3. **Marker placement**: Placed above the struct declaration in the comment
+        block, consistent with TrustManager''s pattern in `trustmanager_types.go`
+        line 39.
+
+        4. **Message text**: Uses "CertManager is a singleton, .metadata.name must
+        be ''cluster''" which follows TrustManager''s message pattern ("TrustManager
+        is a singleton, .metadata.name must be ''cluster''") by simply substituting
+        the type name.
+
+        5. **Make target**: Correctly identifies `make manifests` as the required
+        command and explains both CRD and bundle regeneration.
+
+        6. **Singleton enforcement convention**: Follows the cert-manager-operator
+        convention of enforcing singleton constraints via CEL `x-kubernetes-validations`
+        markers at the API level, not in controller logic.
+
+
+        The agent researched the existing codebase patterns (TrustManager marker,
+        CRD manifests, Makefile targets) before implementing, and the resulting change
+        is exactly what a senior maintainer would expect.'
+      value: 5
+    efficiency:
+      judge_type: check
+      rationale: 'Excessive: 133 turns, $8.05'
+      value: false
+    hallucination_check:
+      judge_type: llm
+      rationale: 'The implementation is fully grounded and contains no hallucinations:
+
+
+        1. **Correct marker syntax**: Uses `+kubebuilder:validation:XValidation:rule="self.metadata.name
+        == ''cluster''",message="CertManager is a singleton, .metadata.name must be
+        ''cluster''"` — matches the exact kubebuilder marker format.
+
+
+        2. **CEL rule is correct**: `self.metadata.name == ''cluster''` with single
+        quotes around ''cluster'', matching the TrustManager pattern the agent verified
+        exists at line 39 of `trustmanager_types.go`.
+
+
+        3. **Marker placement**: Placed above the `type CertManager struct` declaration
+        in the comment block, which is the correct position for kubebuilder markers.
+
+
+        4. **File path**: `api/operator/v1alpha1/certmanager_types.go` is the correct
+        file referenced.
+
+
+        5. **Make target**: `make manifests` is identified as the correct command,
+        and the agent verified this exists in the Makefile.
+
+
+        6. **Message text**: "CertManager is a singleton, .metadata.name must be ''cluster''"
+        follows the TrustManager pattern ("TrustManager is a singleton, .metadata.name
+        must be ''cluster''").
+
+
+        7. **Referenced existing patterns**: The agent correctly references `trustmanager_types.go`
+        line 39, the existing CRD files in `config/crd/bases/` and `bundle/manifests/`,
+        and the generated `x-kubernetes-validations` YAML structure — all consistent
+        with the reference implementation.
+
+
+        8. **No invented packages, methods, fields, or file paths**: All references
+        are to real existing structures in the codebase.
+
+
+        The implementation is clean, accurate, and follows the established patterns
+        exactly.'
+      value: 5
+    task_success:
+      judge_type: llm
+      rationale: 'The agent''s implementation is fully correct and matches the reference
+        in all key criteria:
+
+
+        1. **Correct XValidation marker syntax**: Uses `+kubebuilder:validation:XValidation:rule="...",message="..."`
+        — exactly right.
+
+        2. **CEL rule uses correct expression**: `self.metadata.name == ''cluster''`
+        with single quotes around ''cluster''.
+
+        3. **Marker placed above the struct declaration**: Positioned in the comment
+        block directly above `type CertManager struct`, matching TrustManager''s pattern.
+
+        4. **`make manifests` identified as the required command**: Correctly stated
+        and explained what it regenerates.
+
+        5. **Message text is consistent with TrustManager''s pattern**: "CertManager
+        is a singleton, .metadata.name must be ''cluster''" follows the same pattern
+        as TrustManager''s "TrustManager is a singleton, .metadata.name must be ''cluster''".
+
+
+        The agent also correctly identified the existing TrustManager pattern, verified
+        the CRD outputs, and described the expected YAML changes. The implementation
+        would work as-is and pass code review.'
+      value: 5
+  cm-002-validate-manifest:
+    code_correctness:
+      judge_type: llm
+      rationale: 'The implementation is technically sound and would likely compile
+        correctly. The `validateDeploymentManifest` function correctly mirrors the
+        TrustManager pattern — iterating over containers checking for the named constant
+        `istiocsrContainerName`, returning descriptive errors with `fmt.Errorf`. The
+        call site is correctly placed before any mutations in `getDeploymentObject`.
+        The use of `common.NewIrrecoverableError` follows existing codebase patterns.
+        The test is table-driven with 5 cases covering valid, wrong container, nil
+        containers, missing volume, and present volume scenarios — exceeding the minimum
+        3 cases required.
+
+
+        The minor issues are: (1) The volume validation uses a package-level mutable
+        variable `requiredDeploymentVolumes` that is empty, making the volume check
+        effectively a no-op in production — this is a design smell even if technically
+        correct. The test exercises it by mutating package state, which is not ideal
+        but functional. (2) The error wrapping at the call site uses `common.NewIrrecoverableError(err,
+        "invalid istio-csr deployment manifest")` rather than `fmt.Errorf("invalid
+        IstioCSR deployment manifest from bindata: %w", err)` as shown in the reference
+        — this is a reasonable adaptation to match existing codebase patterns but
+        differs from the reference. (3) The agent spent considerable time deliberating
+        but ultimately produced correct Go code with proper types, correct API usage,
+        and valid import paths. All struct field accesses (`deployment.Spec.Template.Spec.Containers`,
+        etc.) are correct for the appsv1 and corev1 types.'
+      value: 4
+    consulted_docs:
+      judge_type: builtin
+      rationale: Read 0/2 expected docs (coverage 0%, threshold 0%)
+      value: true
+    convention_adherence:
+      judge_type: llm
+      rationale: 'The agent''s implementation closely follows the cert-manager-operator''s
+        "Deployment mutation pattern" convention: it creates a `validateDeploymentManifest`
+        function that mirrors the TrustManager pattern, uses a named constant (`istiocsrContainerName`)
+        for the container check, places the validation call before any mutation functions
+        run in the pipeline, and wraps the error using `common.NewIrrecoverableError`
+        consistent with the codebase''s error handling pattern. The function structure
+        (loop over containers, loop over volumes, return fmt.Errorf with descriptive
+        message) is a faithful copy of the TrustManager approach.
+
+
+        The minor deviation is the volume validation approach: using a mutable package-level
+        `var requiredDeploymentVolumes = []string{}` that gets temporarily mutated
+        in tests is a somewhat awkward pattern. The reference implementation simply
+        omits volume validation since no static volumes exist, keeping the function
+        cleaner. The agent overthought the volume requirement and introduced test-time
+        mutation of package state, which is less idiomatic than the reference''s simpler
+        approach.
+
+
+        The test is table-driven with 5 cases (exceeding the minimum 3), covers valid,
+        missing container, wrong container name, nil containers, and volume scenarios.
+        However, the test uses raw struct literals and `t.Run` rather than any framework-specific
+        patterns, which is consistent with how the reference implementation''s test
+        is structured (this is a cert-manager-operator repo, not multiarch-tuning-operator,
+        so Ginkgo/builder conventions don''t apply here). Overall this is a strong
+        implementation with one minor convention concern around the volume validation
+        design.'
+      value: 4
+    efficiency:
+      judge_type: check
+      rationale: 'Excessive: 133 turns, $8.05'
+      value: false
+    hallucination_check:
+      judge_type: llm
+      rationale: 'The agent''s implementation is largely grounded and follows the
+        existing patterns correctly. Let me evaluate against the specific criteria:
+
+
+        **Grounding Analysis:**
+
+        1. **Packages**: The agent references `common.NewIrrecoverableError` - this
+        appears to be a real function in the codebase''s common package, consistent
+        with the trustmanager pattern. The agent references `assets.MustAsset`, `appsv1.Deployment`,
+        `corev1.Container`, `corev1.Volume` - all standard and correct references.
+
+        2. **Methods/Functions**: `decodeDeploymentObjBytes`, `testDeployment()`,
+        `common.UpdateNamespace` - these appear to be existing functions the agent
+        observed in the codebase.
+
+        3. **Constants**: `istiocsrContainerName` and `deploymentAssetName` are referenced
+        as existing constants.
+
+        4. **File paths**: `pkg/controller/istiocsr/deployments.go` and `pkg/controller/istiocsr/deployments_test.go`
+        are referenced as existing files.
+
+        5. **No invented packages, methods, or fields are apparent.
+
+
+        **Score 5 Criteria Evaluation:**
+
+        1. ✅ Validation function mirrors TrustManager''s pattern
+
+        2. ✅ Called BEFORE any mutation functions run (guard at pipeline entry)
+
+        3. ✅ Returns early with a descriptive error wrapping the specific violation
+
+        4. ✅ Table-driven test with 5 cases including valid, missing container, wrong
+        container name
+
+        5. ✅ Container name uses a named constant (`istiocsrContainerName`)
+
+
+        **Concerns:**
+
+        - The `requiredDeploymentVolumes` as an empty slice with test-time mutation
+        is a somewhat awkward design pattern (mutating package-level state in tests),
+        but it''s not a hallucination.
+
+        - The volume validation is structurally present but effectively a no-op with
+        the empty slice, which is a reasonable compromise given the bindata has no
+        static volumes.
+
+        - The agent''s extended deliberation/reasoning is verbose but the final implementation
+        is clean and correct.
+
+
+        The implementation is grounded with no hallucinated references. It follows
+        the existing patterns correctly and creates new code that is clearly marked
+        as new additions. The test structure is comprehensive with 5 cases covering
+        the required scenarios.'
+      value: 3
+    task_success:
+      judge_type: llm
+      rationale: The agent correctly implements the `validateDeploymentManifest` function
+        that checks for the expected container name using the `istiocsrContainerName`
+        constant, calls it before any mutations in the pipeline (right after decoding
+        the deployment), and returns a descriptive error. The table-driven test has
+        5 cases covering valid, wrong container name, empty containers, missing volume,
+        and present volume — exceeding the minimum 3 cases. The function mirrors the
+        TrustManager pattern well. The minor issue is the volume validation uses an
+        empty `requiredDeploymentVolumes` package-level variable that is effectively
+        dead code in production (only exercised by tests that temporarily modify it),
+        which is a somewhat awkward design choice compared to a cleaner approach.
+        The error wrapping uses `common.NewIrrecoverableError` instead of a simple
+        `fmt.Errorf` wrap as shown in the reference, but this follows the existing
+        codebase pattern so is reasonable. Overall a solid implementation with minor
+        design quibbles.
+      value: 4
+  cm-003-optional-informer:
+    code_correctness:
+      judge_type: llm
+      rationale: 'The implementation has several notable deviations from the reference
+        and potential correctness issues:
+
+
+        1. **Does not use `InitInformerIfAvailable[T]` as specified in the reference.**
+        The reference clearly calls for using the existing generic function `InitInformerIfAvailable`
+        with the signature `InitInformerIfAvailable[configinformers.SharedInformerFactory](ctx,
+        discoveryClient, "config.openshift.io", "v1", "proxies", configInformerFactory)`.
+        The agent''s implementation rewrites the entire `apidiscovery.go` file with
+        a completely different signature for `InitInformerIfAvailable` that takes
+        a `ResourceDiscoverer` and a `func() groupInformer` instead. This is a fundamental
+        deviation — the agent is reimplementing/restructuring the API discovery pattern
+        rather than using the existing one.
+
+
+        2. **Signature mismatch for `NewProxyInformerIfAvailable`.** The reference
+        takes `(ctx context.Context, discoveryClient discovery.DiscoveryInterface,
+        configInformerFactory configinformers.SharedInformerFactory)` but the agent
+        takes `(configClient configv1client.Interface, resyncInterval time.Duration)`.
+        The agent creates the informer factory inside the function rather than receiving
+        it, and uses `configClient.Discovery()` which may not exist on the `configv1client.Interface`
+        (the OpenShift config versioned clientset typically doesn''t embed the discovery
+        interface).
+
+
+        3. **Return type difference.** The reference returns `OptionalInformer[T]`
+        (value type) while the agent returns `*OptionalInformer[T]` (pointer type).
+        This changes the contract and how the caller interacts with it.
+
+
+        4. **Proxy field access uses `proxy.Status.HTTPProxy` instead of `proxy.Spec.HTTPProxy`**
+        as specified in the reference. While both fields exist on the Proxy type,
+        the reference explicitly calls for `Spec` fields.
+
+
+        5. **The `nil` check pattern `r.proxyInformer != nil && r.proxyInformer.Applicable()`**
+        works but is different from the reference''s cleaner `r.proxyInformer.Applicable()`
+        pattern (which works when it''s a value type, not a pointer).
+
+
+        6. **Positive aspects:** The `Applicable()` guard is present, the error from
+        `NewProxyInformerIfAvailable` is propagated, and the informer is threaded
+        through the constructor rather than being a global. The GVR is correct ("proxies"
+        in "config.openshift.io"). The overall structure and intent are correct.
+
+
+        The code likely would not compile against the actual codebase since it rewrites
+        the existing `InitInformerIfAvailable` function with an incompatible signature,
+        breaking all existing callers.'
+      value: 3
+    consulted_docs:
+      judge_type: builtin
+      rationale: Read 0/2 expected docs (coverage 0%, threshold 0%)
+      value: true
+    convention_adherence:
+      judge_type: llm
+      rationale: The implementation follows the OptionalInformer pattern and uses
+        `Applicable()` guards correctly, which is the most critical cert-manager-operator
+        convention. However, it deviates significantly from the reference implementation's
+        expected API. The reference expects `NewProxyInformerIfAvailable` to accept
+        `(ctx, discoveryClient, configInformerFactory)` and call `InitInformerIfAvailable[T]`
+        with the generic signature `(ctx, discoveryClient, group, version, resource,
+        factory)`, but the agent's implementation changes the function signature to
+        accept `(configClient, resyncInterval)` and uses `NewResourceDiscoverer` +
+        a different `InitInformerIfAvailable` signature with a `ResourceDiscoverer`
+        and `informerInitFunc`. The agent also creates a new `configv1client.Interface`
+        dependency and factory inside `NewProxyInformerIfAvailable` rather than accepting
+        an already-constructed `configinformers.SharedInformerFactory` — this reimplements/restructures
+        the discovery flow rather than following the existing generic pattern. The
+        GVR is correct (`config.openshift.io/v1/proxies`). The informer is threaded
+        through constructors (not global), and errors are propagated. The `Applicable()`
+        guard is present with a nil check. The proxy field reads from `Status` (HTTPProxy,
+        HTTPSProxy, NoProxy) rather than `Spec` as shown in the reference. The approach
+        is recognizable and partially follows conventions but has multiple deviations
+        from the expected pattern.
+      value: 3
+    efficiency:
+      judge_type: check
+      rationale: 'Excessive: 133 turns, $8.05'
+      value: false
+    hallucination_check:
+      judge_type: llm
+      rationale: 'The implementation has several concerns regarding potential hallucinations,
+        but also demonstrates understanding of the codebase patterns.
+
+
+        **Potential Issues:**
+
+
+        1. **`InitInformerIfAvailable` signature mismatch**: The reference implementation
+        shows `InitInformerIfAvailable` as a generic function taking `(ctx, discoveryClient,
+        group, version, resource, factory)` parameters. The agent''s implementation
+        rewrites it entirely with a different signature: `(d ResourceDiscoverer, informerInitFunc
+        func() groupInformer)`. The agent appears to have rewritten the entire `apidiscovery.go`
+        file with a completely different API design pattern (ResourceDiscoverer interface
+        + separate NewResourceDiscoverer constructor). This is not referencing something
+        that exists — it''s creating a new design. While creating new code is acceptable,
+        the agent presents this as if the `ResourceDiscoverer`, `apiResourceDiscoverer`,
+        and the existing `OptionalInformer` generic type with `InformerFactory *GroupInformer`
+        field already exist in the file, which they likely don''t based on the reference
+        implementation showing a simpler API.
+
+
+        2. **`configv1client.Interface` having a `.Discovery()` method**: The agent
+        calls `configClient.Discovery()` on a `configv1client.Interface` (which is
+        `github.com/openshift/client-go/config/clientset/versioned.Interface`). The
+        OpenShift config clientset does embed the `discovery.DiscoveryInterface` via
+        the Kubernetes clientset pattern, so this is likely valid.
+
+
+        3. **`configv1.GroupVersion`**: The agent uses `configv1.GroupVersion.WithResource("proxies")`
+        — `configv1` here is `github.com/openshift/api/config/v1`, which does define
+        `GroupVersion`.
+
+
+        4. **`proxy.Status.HTTPProxy`, `proxy.Status.HTTPSProxy`, `proxy.Status.NoProxy`**:
+        The reference uses `proxy.Spec.HTTPSProxy`, `proxy.Spec.HTTPProxy`, `proxy.Spec.NoProxy`.
+        The agent uses `proxy.Status.*` fields instead. Both exist on the OpenShift
+        Proxy CR, but using Status vs Spec is a design choice difference, not a hallucination
+        per se.
+
+
+        5. **Various struct and function references in controller.go**: The agent
+        references `common.CtrlClient`, `common.NewClient`, `common.ManagedResourceLabelKey`,
+        `common.OperatorNamespace`, `common.TrustedCABundleConfigMapName`, `common.HandleReconcileResult`,
+        `trustmanager.ControllerName`, `v1alpha1.TrustManager`, etc. These appear
+        to follow existing patterns but without seeing the actual codebase, some of
+        these could be invented.
+
+
+        6. **`setup_manager.go` structure**: The agent rewrites significant portions
+        of `setup_manager.go` including the `Manager` struct, `NewControllerManager`,
+        etc. The overall pattern seems reasonable for a controller-runtime based operator.
+
+
+        7. **The `configv1.Install(scheme)` call**: This is the correct way to register
+        OpenShift config/v1 types.
+
+
+        **Positive aspects:**
+
+        - Uses `Applicable()` guard before accessing informer
+
+        - Threads through constructor (not global)
+
+        - Error from proxy discovery is propagated
+
+        - Correct GVR for proxies
+
+        - The nil check `r.proxyInformer != nil` provides safety for test scenarios
+
+
+        The main concern is whether the existing `apidiscovery.go` file actually has
+        the `ResourceDiscoverer` interface pattern or the simpler function-based pattern
+        shown in the reference. The agent appears to have either hallucinated the
+        existing structure or completely rewritten it. Since the agent presents the
+        full file as if rewriting it, and the design is internally consistent, this
+        is more of a deviation from the reference than a clear hallucination of existing
+        APIs. The implementation would likely compile if taken as a complete replacement,
+        though it deviates significantly from the expected approach.'
+      value: 3
+    task_success:
+      judge_type: llm
+      rationale: "The agent demonstrates understanding of the pattern and produces\
+        \ a reasonable implementation, but diverges significantly from the reference\
+        \ in several ways. \n\n**Correct aspects**: (1) Uses `InitInformerIfAvailable`\
+        \ generic function rather than reimplementing API discovery. (2) Correct GVR\
+        \ target: `config.openshift.io/v1/proxies`. (3) Uses `Applicable()` guard\
+        \ before accessing the informer. (4) Threads the proxy informer through the\
+        \ constructor rather than using a global. (5) Error from `NewProxyInformerIfAvailable`\
+        \ is propagated.\n\n**Significant divergences**: (1) The `NewProxyInformerIfAvailable`\
+        \ function signature differs substantially from the reference — it takes `configv1client.Interface`\
+        \ and `time.Duration` instead of `context.Context`, `discovery.DiscoveryInterface`,\
+        \ and `configinformers.SharedInformerFactory`. The reference expects the function\
+        \ to accept a pre-built `SharedInformerFactory` and `DiscoveryInterface`,\
+        \ following a cleaner separation of concerns. (2) The agent's function creates\
+        \ a new `SharedInformerFactory` internally rather than receiving one, which\
+        \ changes the wiring pattern. (3) The reference uses `OptionalInformer[configinformers.SharedInformerFactory]`\
+        \ (value type) while the agent uses `*OptionalInformer[...]` (pointer type)\
+        \ throughout, requiring nil checks that shouldn't be necessary. (4) The proxy\
+        \ reading in `applyClusterProxySettings` uses `proxy.Status.*` fields instead\
+        \ of the reference's `proxy.Spec.*` fields. (5) The `setup_manager.go` changes\
+        \ are speculative — the agent rewrites the entire file rather than showing\
+        \ targeted modifications, introducing potential errors. While the core concept\
+        \ is correct, the implementation would require non-trivial fixes to match\
+        \ the expected API contract."
+      value: 3
+  cm-004-immutable-field:
+    code_correctness:
+      judge_type: llm
+      rationale: 'The agent''s implementation has several notable deviations from
+        the reference and some correctness issues:
+
+
+        1. **Non-pointer type**: The field is declared as `string` instead of `*string`.
+        The reference specifies a pointer type (`*string`) for the optional field.
+        With a plain `string`, the `omitempty` tag will treat an empty string as unset,
+        but more critically, the `has()` CEL function used in the struct-level validation
+        works differently with non-pointer/non-optional fields — for a required string
+        field, `has()` always returns true, which would break the presence-immutability
+        logic.
+
+
+        2. **Incorrect CEL presence-immutability rule**: The struct-level rule `!has(oldSelf.tlsMinVersion)
+        && !has(self.tlsMinVersion) || has(oldSelf.tlsMinVersion) && has(self.tlsMinVersion)`
+        is logically wrong. This is a biconditional (both must be present or both
+        must be absent), which means you can NEVER set the field after initial creation
+        if it wasn''t set at creation time, AND you can never unset it. The reference
+        pattern `!has(oldSelf.field) || has(self.field)` only prevents removal (set→unset),
+        allowing initial setting (unset→set). The agent''s rule is overly restrictive.
+
+
+        3. **Not using separate mutation function pattern**: The reference asks for
+        a separate `updateTLSMinVersion` mutation function following the typed `deploymentMutationFunc`
+        pattern and chaining it in the pipeline. Instead, the agent adds the logic
+        inline within the existing `updateArgList` function. While functionally this
+        may work for adding the arg, it doesn''t follow the required architectural
+        pattern.
+
+
+        4. **Field-level CEL rule `self == oldSelf`**: This is correct for value immutability
+        on a simple type and is a valid simplification since at the field level, `self`
+        refers to the field value directly. This part is fine.
+
+
+        5. **Kubebuilder markers are syntactically valid** and the enum values are
+        correct.
+
+
+        The code would likely compile but the presence-immutability CEL rule has incorrect
+        semantics (too restrictive), the type is wrong (not a pointer), and the mutation
+        pattern doesn''t match the expected architecture.'
+      value: 3
+    consulted_docs:
+      judge_type: builtin
+      rationale: Read 0/2 expected docs (coverage 0%, threshold 0%)
+      value: true
+    convention_adherence:
+      judge_type: llm
+      rationale: 'The implementation has several convention deviations from the reference:
+
+
+        1. **Non-pointer type**: The field uses `string` instead of `*string` (pointer
+        type). The reference explicitly requires a pointer type for optional fields,
+        and this is important for distinguishing between "not set" and "empty string"
+        in Go. The agent even checks `!= ""` instead of `!= nil` in the deployment
+        code.
+
+
+        2. **CEL rule pattern diverges from codebase convention**: The reference specifies
+        two separate XValidation markers on the field itself following the exact pattern
+        used for `IssuerRef` and `privateKeyAlgorithm` in the same file. The agent
+        instead splits them across two locations — one on the struct and one on the
+        field — and uses a different logical formulation for the presence check (`!has(oldSelf.x)
+        && !has(self.x) || has(oldSelf.x) && has(self.x)` vs the reference''s `!has(oldSelf.x)
+        || has(self.x)`). While logically equivalent, it doesn''t match the established
+        two-rule-on-field pattern. Furthermore, the presence-immutability rule as
+        written on the struct level actually prevents setting the field after creation
+        even when it wasn''t previously set (it requires both to be absent or both
+        present), which is overly restrictive and incorrect — it should allow unset
+        → set transitions.
+
+
+        3. **Deployment mutation pattern**: The reference calls for a separate named
+        mutation function (`updateTLSMinVersion`) following the typed `deploymentMutationFunc`
+        pattern chained in the pipeline, consistent with the "Deployment mutation
+        pattern" convention. The agent instead adds the logic inline within the existing
+        `updateArgList` function. While this works functionally, it doesn''t follow
+        the convention of separate named mutation functions chained in a pipeline.
+
+
+        4. **Make target order**: The agent states `make generate` before `make manifests`,
+        but the convention specifies `make manifests` MUST precede `make generate`.
+        However, looking more carefully, the agent''s instructions say to run them
+        in the order listed, which has `make generate` first — this contradicts the
+        convention.
+
+
+        The approach is recognizable and partially follows conventions (correct enum
+        values, CEL validation concept present, integration into existing deployment
+        code), but multiple convention gaps exist.'
+      value: 3
+    efficiency:
+      judge_type: check
+      rationale: 'Excessive: 133 turns, $8.05'
+      value: false
+    hallucination_check:
+      judge_type: llm
+      rationale: 'The implementation is largely grounded in the existing codebase
+        patterns, but there are several deviations from the reference implementation
+        that affect quality:
+
+
+        **Grounded aspects (positive):**
+
+        - The file paths (`api/operator/v1alpha1/istiocsr_types.go`, `pkg/controller/istiocsr/deployments.go`)
+        appear correct based on the reference.
+
+        - The agent correctly references existing struct names (`IstioCSRConfig`),
+        field names (`NodeSelector`), and functions (`updateArgList`).
+
+        - The agent references existing patterns like `istiocsrContainerName`, `istiocsrConfigs`,
+        and the `configmap-namespace-selector` block.
+
+        - The `make generate`, `make manifests`, `make test` targets appear reasonable
+        for a kubebuilder project.
+
+        - The agent correctly references `v1alpha1.IstioCSR` type and `deployment.Spec.Template.Spec.Containers`.
+
+
+        **Deviations from reference (concerns):**
+
+        1. **Non-pointer type**: The field is declared as `TLSMinVersion string` instead
+        of `TLSMinVersion *string`. The reference explicitly requires a pointer type
+        for optional fields. This is a functional difference - with a non-pointer
+        string, `omitempty` works differently and the CEL `has()` semantics may differ.
+
+
+        2. **CEL rule structure differs**: The presence-immutability rule is placed
+        on the struct level rather than as a field-level XValidation marker. The reference
+        uses two field-level XValidation markers. The agent''s struct-level rule `!has(oldSelf.tlsMinVersion)
+        && !has(self.tlsMinVersion) || has(oldSelf.tlsMinVersion) && has(self.tlsMinVersion)`
+        is logically different from the reference''s `!has(oldSelf.tlsMinVersion)
+        || has(self.tlsMinVersion)` - the agent''s version is MORE restrictive (it
+        prevents setting the field after creation if it wasn''t initially set, which
+        is incorrect behavior).
+
+
+        3. **Value-immutability rule**: Uses `self == oldSelf` which works for a string
+        field but differs from the reference pattern of `!has(self.field) || self.field
+        == oldSelf.field`.
+
+
+        4. **Mutation function pattern**: The agent integrates into `updateArgList`
+        rather than creating a separate `updateTLSMinVersion` function following the
+        typed `deploymentMutationFunc` pattern. This may be a valid approach if `updateArgList`
+        exists, but it doesn''t follow the reference''s mutation pipeline pattern.
+
+
+        **No clear hallucinations of non-existent references were found.** The agent
+        appears to reference real code structures. The issues are about implementation
+        approach differences rather than inventing things that don''t exist.
+
+
+        The presence-immutability CEL rule is functionally incorrect (too restrictive
+        - prevents adding the field on update even if it was never set), but the references
+        to existing code appear grounded.'
+      value: 3
+    task_success:
+      judge_type: llm
+      rationale: 'The agent correctly identified the right files to modify, added
+        the field with correct enum values (VersionTLS12, VersionTLS13), and implemented
+        the deployment mutation logic. However, there are several significant deviations
+        from the reference: (1) The field uses a plain `string` type instead of `*string`
+        pointer type, which changes the semantics for an optional field; (2) The CEL
+        presence-immutability rule on the struct (`!has(oldSelf.tlsMinVersion) &&
+        !has(self.tlsMinVersion) || has(oldSelf.tlsMinVersion) && has(self.tlsMinVersion)`)
+        is logically different from the reference pattern — it incorrectly prevents
+        setting the field after creation if it wasn''t initially set (the reference
+        allows unset→set but prevents set→unset); (3) The mutation logic is inlined
+        into the existing `updateArgList` function rather than following the typed
+        `deploymentMutationFunc` pattern with a separate function chained in the pipeline.
+        The presence-immutability CEL rule is a meaningful semantic bug that would
+        reject valid use cases (adding tlsMinVersion to an existing resource that
+        didn''t have it set).'
+      value: 3
+  cm-005-hash-triggered-restart:
+    code_correctness:
+      judge_type: llm
+      rationale: 'The implementation correctly addresses all five critical correctness
+        points: (1) hashes PEM content using SHA-256 via `crypto/sha256`, not `resourceVersion`;
+        (2) has an idempotency guard through the `deploymentSpecModified` annotation
+        comparison that skips updates when the hash is unchanged; (3) places the annotation
+        on `Deployment.Spec.Template.Annotations` (pod template), not on `Deployment.ObjectMeta`;
+        (4) uses `crypto/sha256` correctly; (5) mirrors the TrustManager pattern structure.
+
+
+        The Go code is structurally sound with correct types, pointer receivers, and
+        import paths. The `computeCABundleHash` function correctly uses `sha256.Sum256`
+        and `hex.EncodeToString`. The `stampCABundleHashAnnotation` function properly
+        handles nil annotation maps and empty hashes.
+
+
+        Minor issues: (1) The `common.FromClientError` function may not exist in the
+        common package — the agent references it without verifying its existence,
+        and the typical pattern would be `fmt.Errorf` with `%w`. (2) The `common.TrustedCABundleConfigMapName`
+        and `common.TrustedCABundleKey` constants are referenced but may not exist
+        exactly as named — the agent didn''t verify these constant names definitively.
+        (3) The test file references `testDeployment()` which is assumed to exist
+        in the test package but wasn''t verified. These are minor issues that would
+        be easily fixable, and the overall architecture and pattern adherence is correct.'
+      value: 4
+    consulted_docs:
+      judge_type: builtin
+      rationale: Read 0/2 expected docs (coverage 0%, threshold 0%)
+      value: true
+    convention_adherence:
+      judge_type: llm
+      rationale: 'The implementation follows the most critical cert-manager-operator
+        conventions correctly:
+
+
+        1. **Hash-triggered restarts**: Uses SHA-256 hash of PEM content (not `resourceVersion`),
+        stamped as a pod template annotation (`Deployment.Spec.Template.Annotations`),
+        matching the TrustManager pattern exactly.
+
+
+        2. **Idempotency guard**: The idempotency is achieved through the existing
+        `deploymentSpecModified` comparison (enhanced with annotation comparison),
+        which skips updates when the hash hasn''t changed. This is a valid approach,
+        though slightly different from the reference''s direct `currentHash == hash`
+        early-return pattern — the agent''s approach leverages the existing codebase''s
+        drift-detection mechanism, which is arguably more idiomatic to this specific
+        repo.
+
+
+        3. **Deployment mutation pattern**: The agent follows the repo''s convention
+        of named Go functions chained in a pipeline (`stampCABundleHashAnnotation`
+        called within `getDeploymentObject`), consistent with how other mutations
+        work in the codebase.
+
+
+        4. **Image source / constants**: Uses `common.TrustedCABundleConfigMapName`
+        and `common.TrustedCABundleKey` from the common package, following existing
+        patterns.
+
+
+        5. **Controller Watch pattern**: Adds a dedicated predicate and mapFunc for
+        the CA bundle ConfigMap, mirroring how the trustmanager controller watches
+        resources.
+
+
+        The one minor deviation is in the test file: the agent uses raw `func Test*`
+        with `t.Run` subtests rather than Ginkgo BDD-style tests. However, looking
+        at the conventions listed, the Ginkgo requirement is specifically for the
+        multiarch-tuning-operator, not the cert-manager-operator. The cert-manager-operator''s
+        istiocsr package appears to use standard Go testing based on the agent''s
+        examination of existing test files (e.g., `deployments_test.go` line 1085
+        uses standard patterns). The agent also uses `testDeployment()` helper which
+        appears to be an existing test helper in the package, showing awareness of
+        existing test utilities. One minor concern is the annotation name `operator.openshift.io/ca-bundle-hash`
+        differs slightly from the reference''s `operator.openshift.io/cert-manager-bundle-hash`,
+        but this is a naming choice rather than a convention violation.'
+      value: 4
+    efficiency:
+      judge_type: check
+      rationale: 'Excessive: 133 turns, $8.05'
+      value: false
+    hallucination_check:
+      judge_type: llm
+      rationale: 'The implementation meets all five critical correctness criteria
+        from the reference:
+
+
+        1. **Hash of PEM content (not resourceVersion)**: ✅ Uses `sha256.Sum256([]byte(caBundle))`
+        on the actual PEM data from `cm.Data[common.TrustedCABundleKey]`.
+
+
+        2. **Idempotency guard**: ✅ The idempotency guard is implemented through the
+        existing `deploymentSpecModified` function (enhanced with annotation comparison).
+        When the hash hasn''t changed, the desired deployment matches the fetched
+        one, so no update occurs. This is a valid approach, though different from
+        the explicit `currentHash == hash` check in the reference.
+
+
+        3. **Annotation on Deployment.Spec.Template.Annotations**: ✅ The `stampCABundleHashAnnotation`
+        function correctly sets `deployment.Spec.Template.Annotations[caBundleHashAnnotation]`,
+        which is the pod template level.
+
+
+        4. **SHA-256**: ✅ Uses `crypto/sha256` with `sha256.Sum256`.
+
+
+        5. **Mirrors TrustManager pattern**: ✅ The overall approach follows the same
+        pattern - read ConfigMap, hash PEM content, stamp on pod template.
+
+
+        Regarding grounding/hallucinations, there are some concerns:
+
+
+        - References to `common.OperatorNamespace`, `common.TrustedCABundleConfigMapName`,
+        `common.TrustedCABundleKey`, `common.FromClientError`, `common.NewIrrecoverableError`
+        - these are referenced as existing constants/functions in the `common` package.
+        The agent read the common package files but we can''t fully verify all of
+        these exist. However, given the trustmanager pattern source uses similar constants,
+        these are plausible.
+
+
+        - References to `common.CtrlClient` having `List` method - plausible for a
+        controller-runtime client wrapper.
+
+
+        - The `testDeployment()` function referenced in tests - this is assumed to
+        exist in the test package already.
+
+
+        - File paths and line numbers are referenced with reasonable specificity,
+        suggesting the agent actually read the files.
+
+
+        - The `v1alpha1.IstioCSRList` type is referenced - this should exist if `IstioCSR`
+        is a proper CRD type.
+
+
+        The implementation is thorough, well-structured, and addresses all the critical
+        points. The approach is slightly different from the reference (using deployment
+        spec comparison for idempotency rather than explicit hash comparison before
+        patching), but it achieves the same result. The agent also added proper ConfigMap
+        watching, test files, and updated existing tests.
+
+
+        The main risk is potential hallucination of specific constant names and utility
+        functions in the `common` package, but the agent explicitly read those files
+        before referencing them, making this reasonably grounded.'
+      value: 3
+    task_success:
+      judge_type: llm
+      rationale: 'The agent''s implementation covers all five critical correctness
+        points from the reference: (1) SHA-256 hash of PEM content via `crypto/sha256`,
+        not `resourceVersion`; (2) idempotency guard through the `deploymentSpecModified`
+        annotation comparison that skips updates when the hash is unchanged; (3) annotation
+        placed on `Deployment.Spec.Template.Annotations` (pod template), not on `Deployment.ObjectMeta`;
+        (4) uses `crypto/sha256` specifically; (5) mirrors the TrustManager pattern
+        structure with a dedicated `configmaps.go` file, hash computation, and stamp
+        function. The implementation goes beyond the minimum by also adding a ConfigMap
+        watch with a dedicated predicate and map function in the controller, updating
+        `deploymentSpecModified` in utils.go to detect annotation drift, updating
+        test files for the changed signatures, and providing unit tests. The approach
+        is comprehensive, well-structured, and would work as-is.'
+      value: 5
+  mto-001-add-api-field:
+    code_correctness:
+      judge_type: llm
+      rationale: 'The agent''s implementation has several notable issues:
+
+
+        1. **Make target ordering is wrong**: The reference specifies `make manifests`
+        must run before `make generate`, but the agent states `make generate` must
+        run before `make manifests` and provides the command `make generate manifests
+        test`. This is a critical ordering error that the reference explicitly calls
+        out as "critical and non-obvious." The agent''s reasoning ("the CRD generator
+        reads the Go types including their DeepCopy methods") is incorrect per the
+        reference.
+
+
+        2. **v1alpha1 conversion approach differs from reference**: The reference
+        states that v1alpha1 does NOT get the new field, and the conversion function
+        should explicitly ignore/drop the field with a comment explaining why. The
+        agent instead adds the field to v1alpha1 and copies it in both conversion
+        directions. While this is a valid engineering approach that would compile
+        and work, it contradicts the specific requirement to NOT add the field to
+        v1alpha1 and to handle it via an ignore pattern in conversion, similar to
+        how FallbackArchitecture is handled (present only in v1beta1, round-tripped
+        via annotation in v1alpha1).
+
+
+        3. **Positive aspects**: The Go type is correct (`*int32`), kubebuilder markers
+        are syntactically valid (Minimum, Maximum, default), the informer access pattern
+        (`cppcInformer.GetClusterPodPlacementConfig()`) is used correctly rather than
+        a direct API call, import paths appear correct for the repository, and the
+        `maxRetries()` method modification is well-structured with proper fallback
+        default. The backward compatibility alias for `MaxRetryCount` is a thoughtful
+        touch.
+
+
+        4. **Marker variation**: The agent uses `+optional` instead of `+kubebuilder:validation:Optional`
+        - this is acceptable as both are valid kubebuilder markers.
+
+
+        The make target ordering error is significant since the reference explicitly
+        highlights it as a key criterion for a score of 5, and the v1alpha1 approach
+        contradicts the explicit requirement. However, the core Go code (types, imports,
+        informer usage) is correct and would compile.'
+      value: 3
+    consulted_docs:
+      judge_type: builtin
+      rationale: Read 0/3 expected docs (coverage 0%, threshold 0%)
+      value: true
+    convention_adherence:
+      judge_type: llm
+      rationale: 'The agent correctly follows several key conventions: it uses the
+        `*int32` pointer type with appropriate kubebuilder markers (Minimum=1, Maximum=20,
+        default=5), uses the CPPC informer singleton pattern (`cppcInformer.GetClusterPodPlacementConfig()`)
+        rather than direct API calls, and properly handles the conversion functions
+        between v1alpha1 and v1beta1.
+
+
+        However, there are significant convention deviations:
+
+
+        1. **Make target ordering is wrong**: The reference specifies `make manifests`
+        MUST precede `make generate`, and this is listed as a critical repository
+        convention. The agent states the opposite: "make generate must run before
+        make manifests" and recommends `make generate manifests test`. This directly
+        contradicts one of the key conventions and the Score 5 criteria.
+
+
+        2. **v1alpha1 field addition instead of ignoring**: The reference approach
+        says v1alpha1 does NOT get the new field, and the conversion function should
+        explicitly ignore/drop it (similar to how FallbackArchitecture is handled
+        via annotation round-tripping). The agent instead adds the field to v1alpha1
+        and does a direct copy in both conversion directions. While this technically
+        works, it deviates from the established pattern in this codebase where v1alpha1
+        is the spoke version that may not have all hub fields, and the convention
+        is to use annotation-based round-tripping for fields not present in v1alpha1.
+
+
+        The CPPC informer access pattern is correctly followed, the kubebuilder markers
+        are correct, and the overall approach is recognizable, but the make target
+        ordering error is a significant convention violation that would definitely
+        be caught in code review.'
+      value: 3
+    efficiency:
+      judge_type: check
+      rationale: 'Excessive: 133 turns, $8.05'
+      value: false
+    hallucination_check:
+      judge_type: llm
+      rationale: 'The implementation has several issues related to grounding:
+
+
+        1. **Make target ordering is WRONG**: The agent states `make generate` must
+        run before `make manifests`, which directly contradicts the reference implementation
+        that says `make manifests` MUST precede `make generate`. The agent says "make
+        generate manifests test" but the reference explicitly states the opposite
+        order is critical. This is a factual error about the build system.
+
+
+        2. **v1alpha1 field addition contradicts the reference**: The reference explicitly
+        states "v1alpha1 does NOT get the new field" and that the conversion function
+        should "explicitly ignore the field." The agent instead adds the field to
+        v1alpha1 and copies it in both conversion directions. While this is a design
+        choice rather than a hallucination of non-existent code, it contradicts the
+        expected approach.
+
+
+        3. **Import path `cppcInformer "github.com/openshift/multiarch-tuning-operator/pkg/informers/clusterpodplacementconfig"`**:
+        This references a package path that needs to exist. The reference mentions
+        "cppcInformer.GetClusterPodPlacementConfig()" which suggests this package
+        and function exist, and the agent uses the same pattern. However, the exact
+        import path needs verification.
+
+
+        4. **`cppcInformer.GetClusterPodPlacementConfig()` function call**: This is
+        used in both the reference and the agent''s implementation, suggesting it''s
+        a real function. The agent appears to be using the correct informer access
+        pattern.
+
+
+        5. **File paths appear correct**: `api/v1beta1/clusterpodplacementconfig_types.go`,
+        `api/v1alpha1/clusterpodplacementconfig_types.go`, `api/v1alpha1/clusterPodPlacementConfig_conversion.go`,
+        `internal/controller/podplacement/pod_model.go` all seem reasonable.
+
+
+        6. **Existing fields and methods referenced**: `pod.Labels`, `utils.ImageInspectionErrorCountLabel`,
+        `MaxRetryCount` constant, `maxRetries()` method — these appear to be grounded
+        in the actual codebase.
+
+
+        7. **The `FallbackArchAnnotation` constant and annotation-based round-tripping
+        pattern** appears to be an existing pattern in the codebase that the agent
+        correctly preserves.
+
+
+        The main concerns are about the make target ordering being wrong and the v1alpha1
+        design choice differing from the reference. The import paths and method calls
+        appear grounded. While the make target ordering is wrong (contradicting the
+        reference), the core code references appear to be grounded in the actual codebase.
+        The agent does reference real packages, methods, and patterns. The make target
+        ordering error is significant but is more of a factual/understanding error
+        than a hallucination of non-existent code.'
+      value: 2
+    task_success:
+      judge_type: llm
+      rationale: 'The agent correctly adds the `MaxImageInspectionRetries *int32`
+        field to `v1beta1` with the proper kubebuilder markers (Minimum=1, Maximum=20,
+        default=5) and uses the CPPC informer pattern (`cppcInformer.GetClusterPodPlacementConfig()`)
+        rather than a direct API call — both key requirements. However, there are
+        two significant issues: (1) The `make` target ordering is wrong — the agent
+        states `make generate` must run before `make manifests`, which is the opposite
+        of the reference requirement that `make manifests` must precede `make generate`.
+        (2) The agent adds the field to `v1alpha1` and copies it in both conversion
+        directions, whereas the reference explicitly states v1alpha1 does NOT get
+        the new field and the conversion function should explicitly ignore/drop it
+        (similar to how `FallbackArchitecture` is handled via annotation). Adding
+        the field to v1alpha1 contradicts the design intent of the task. These are
+        non-trivial errors that would require significant rework.'
+      value: 3
+  mto-002-write-webhook-test:
+    code_correctness:
+      judge_type: llm
+      rationale: 'The implementation has several notable issues that prevent it from
+        fully matching the reference and potentially from compiling:
+
+
+        1. **Invented API**: The code uses `WithNodeSelectors(utils.ControlPlaneNodeSelectorLabel,
+        "")` on the pod builder — there''s no evidence this method exists on the pod
+        builder. The reference implementation uses only `WithName`, `WithNamespace`,
+        and `Build()`. The agent assumes `WithNodeSelectors` exists without confirming
+        it in the builder package, and also assumes `utils.ControlPlaneNodeSelectorLabel`
+        is an exported constant.
+
+
+        2. **Different assertion pattern**: The reference uses `Expect(createdPod.Spec.SchedulingGates).To(BeEmpty())`
+        which is simpler and more idiomatic. The agent uses `NotTo(ContainElement(...))`
+        which is functionally similar but diverges from the expected pattern. The
+        additional label assertion (`HaveKeyWithValue`) goes beyond what the reference
+        expects.
+
+
+        3. **Diverges from reference namespace usage**: The reference uses `WithName("test-pod")`
+        while the agent uses `WithGenerateName("test-pod-apiserver-")`. While this
+        may work, it diverges from the reference pattern.
+
+
+        4. **Correct aspects**: Uses the fluent builder API (`builder.NewPod()`),
+        uses Ginkgo Context/It structure, correctly targets `openshift-kube-apiserver`
+        namespace, properly creates the namespace in envtest, uses `k8sClient` and
+        `ctx`, and import paths appear correct for the repository structure.
+
+
+        5. **The agent''s approach of adding a control-plane node selector is architecturally
+        sound** given the actual code logic, but the reference implementation simply
+        creates a pod without any special node selector, suggesting the exclusion
+        mechanism may work differently than the agent assumes (perhaps via namespace
+        prefix matching for `openshift-*` prefixes). The potentially invented `WithNodeSelectors`
+        method is the most significant concern for compilability.'
+      value: 3
+    consulted_docs:
+      judge_type: builtin
+      rationale: Read 0/2 expected docs (coverage 0%, threshold 0%)
+      value: true
+    convention_adherence:
+      judge_type: llm
+      rationale: 'The implementation follows most repository conventions correctly:
+
+
+        **Conventions followed:**
+
+        - Uses the fluent builder API (`builder.NewPod().WithGenerateName(...).WithNamespace(...).WithNodeSelectors(...).Build()`)
+        instead of struct literals — this is a key convention.
+
+        - Uses Ginkgo''s `Describe/Context/It` BDD hierarchy correctly, nesting inside
+        the existing `When` block.
+
+        - Uses `k8sClient` from the envtest suite setup, consistent with existing
+        test patterns.
+
+        - Uses the same container image pattern from the test registry as existing
+        tests.
+
+        - Imports and uses `utils` constants (`SchedulingGateName`, `SchedulingGateLabel`,
+        `LabelValueNotSet`, `ControlPlaneNodeSelectorLabel`) rather than hardcoding
+        strings.
+
+        - Uses `crclient.ObjectKeyFromObject` for the Get call.
+
+
+        **Minor deviations:**
+
+        - The reference implementation specifies using `BeEmpty()` to assert no scheduling
+        gate, but the agent uses `NotTo(ContainElement(...))` instead. This is a minor
+        stylistic deviation — `BeEmpty()` is simpler and more idiomatic per the reference.
+
+        - The reference uses `WithName("test-pod")` while the agent uses `WithGenerateName("test-pod-apiserver-")`.
+        This is acceptable but differs from the reference.
+
+        - The reference specifies `openshift-kube-apiserver` as the test namespace
+        and expects unconditional exclusion based on namespace prefix, but the agent''s
+        implementation adds a control-plane node selector (`WithNodeSelectors(utils.ControlPlaneNodeSelectorLabel,
+        "")`) because they analyzed the actual code and found the namespace prefix
+        alone wouldn''t trigger exclusion. This shows deep code understanding but
+        deviates from the reference''s intent of testing *namespace-based* exclusion.
+        The test as written tests node-selector-based exclusion, not namespace-based
+        exclusion.
+
+        - The namespace is created inline with a `defer Delete` rather than using
+        a `BeforeEach`/`AfterEach` pattern, which is slightly less idiomatic for Ginkgo
+        but functional.
+
+
+        Overall, the implementation is mostly idiomatic with one notable conceptual
+        deviation (testing control-plane node selector exclusion rather than namespace
+        prefix exclusion as the reference intended), though the builder API usage,
+        Ginkgo structure, and import patterns are all correct.'
+      value: 4
+    efficiency:
+      judge_type: check
+      rationale: 'Excessive: 133 turns, $8.05'
+      value: false
+    hallucination_check:
+      judge_type: llm
+      rationale: 'The implementation is largely grounded in the existing codebase
+        patterns, but there are several concerns:
+
+
+        **Positive aspects (grounded):**
+
+        1. Uses the fluent builder API (`builder.NewPod().WithName(...).WithNamespace(...).Build()`)
+        as required
+
+        2. Uses Ginkgo''s `Context/It` DSL structure correctly
+
+        3. Uses `k8sClient` and `ctx` which are established in the test suite
+
+        4. Correctly imports existing packages like `builder`, `registry`, `utils`
+
+        5. Uses `crclient.ObjectKeyFromObject` correctly
+
+        6. The overall test structure matches the existing file patterns
+
+
+        **Potential hallucinations/concerns:**
+
+        1. `utils.ControlPlaneNodeSelectorLabel` - This constant may or may not exist
+        in the `utils` package. The reference implementation simply uses `openshift-kube-apiserver`
+        as the namespace without needing a control-plane node selector. The agent
+        invented a rationale about `HasControlPlaneNodeSelector()` being the exclusion
+        mechanism, but the reference implementation doesn''t use any node selector.
+
+        2. `utils.SchedulingGateName` - This constant needs to exist in the utils
+        package. It''s plausible but not confirmed.
+
+        3. `utils.SchedulingGateLabel` and `utils.LabelValueNotSet` - These constants
+        are referenced from the webhook code analysis, and appear to exist based on
+        the agent''s code reading.
+
+        4. `builder.NewPod().WithNodeSelectors(...)` - The `WithNodeSelectors` method
+        may or may not exist on the builder. The reference implementation doesn''t
+        use it.
+
+        5. The agent uses `WithGenerateName` instead of `WithName` - this is a deviation
+        from the reference but may exist on the builder.
+
+
+        **Deviation from reference:**
+
+        - The reference implementation simply creates a pod in `openshift-kube-apiserver`
+        without any node selector and expects the namespace prefix alone to trigger
+        exclusion. The agent''s implementation adds complexity by requiring a control-plane
+        node selector, suggesting the agent may have correctly identified that the
+        namespace prefix alone isn''t sufficient (since `openshift-kube-apiserver`
+        doesn''t start with `kube-`), OR the agent may be wrong about the exclusion
+        mechanism.
+
+        - Uses `WithGenerateName` instead of `WithName`
+
+        - Uses `NotTo(ContainElement(...))` instead of `BeEmpty()` for the scheduling
+        gates assertion
+
+
+        The implementation shows careful analysis of the codebase but deviates from
+        the reference approach. The key question is whether `utils.ControlPlaneNodeSelectorLabel`,
+        `WithNodeSelectors`, and `WithGenerateName` actually exist. Based on the agent''s
+        thorough code analysis, these references appear plausible but some may be
+        hallucinated. The agent''s approach is more technically correct (if the namespace
+        prefix alone doesn''t trigger exclusion) but uses methods that may not exist
+        on the builder.'
+      value: 3
+    task_success:
+      judge_type: llm
+      rationale: 'The agent correctly uses the fluent builder API (`builder.NewPod().WithGenerateName(...).WithNamespace(...).Build()`),
+        Ginkgo''s Context/It DSL, and targets the `openshift-kube-apiserver` namespace.
+        However, there are significant deviations from the reference implementation:
+        (1) The agent adds a control-plane node selector (`WithNodeSelectors(utils.ControlPlaneNodeSelectorLabel,
+        "")`) which is not in the reference — the reference expects the namespace
+        exclusion to be unconditional based on the namespace prefix alone, not dependent
+        on a node selector. (2) The assertion uses `NotTo(ContainElement(...))` instead
+        of `BeEmpty()` as specified in the reference. (3) The agent uses `WithGenerateName`
+        instead of `WithName("test-pod")` as in the reference. (4) The agent adds
+        extra complexity with namespace creation/cleanup and label assertions that
+        aren''t in the reference. While the agent did thorough investigation of the
+        codebase, the core understanding diverged from the reference''s expectation
+        that `openshift-*` namespaces are unconditionally excluded — the agent concluded
+        they aren''t excluded by prefix and worked around it with a node selector,
+        which changes the semantics of what''s being tested.'
+      value: 3
+  mto-003-add-metric:
+    code_correctness:
+      judge_type: llm
+      rationale: 'The implementation is largely correct and follows the expected patterns:
+
+
+        1. **Correct metric name**: Uses `mto_ppo_ctrl_image_cache_hits_total` with
+        the proper controller prefix.
+
+        2. **Correct type**: Uses `*prometheus.CounterVec` with the `image_ref` label,
+        matching the reference.
+
+        3. **Correct instrumentation location**: The counter is incremented in the
+        cache hit path in `pkg/image/cache.go`, not in the registry fetch path.
+
+        4. **Registration**: Uses `metrics2.Registry.MustRegister` following the existing
+        pattern in the file.
+
+
+        Minor issues that prevent a score of 5:
+
+        - The registration is done in `pkg/image/metrics/common_metrics.go` rather
+        than in `internal/controller/podplacement/metrics/` as specified by the reference.
+        The agent chose to follow the existing pattern in the `pkg/image/metrics`
+        package, which is reasonable given the codebase structure, but deviates from
+        the reference''s specified location.
+
+        - The agent uses `.With(prometheus.Labels{"image_ref": imageReference})` instead
+        of the simpler `.WithLabelValues(imageRef)`. Both are functionally equivalent
+        and correct Go API calls on CounterVec, but the `.With()` approach requires
+        importing the prometheus package directly into cache.go, adding unnecessary
+        dependency. This is a style difference, not an error.
+
+
+        Overall, the code would compile and function correctly. The metric name, type,
+        label, and instrumentation point are all correct.'
+      value: 4
+    consulted_docs:
+      judge_type: builtin
+      rationale: Read 0/1 expected docs (coverage 0%, threshold 0%)
+      value: true
+    convention_adherence:
+      judge_type: llm
+      rationale: 'The implementation correctly uses the `mto_ppo_ctrl_` prefix for
+        the metric name (`mto_ppo_ctrl_image_cache_hits_total`), uses `prometheus.CounterVec`
+        with the `image_ref` label as required, and instruments the cache hit path
+        (not the registry fetch path) in `pkg/image/cache.go`. Registration follows
+        the existing pattern in `pkg/image/metrics/common_metrics.go` using `metrics2.Registry.MustRegister`
+        inside `InitCommonMetrics()` with `sync.Once`, which matches the codebase
+        convention.
+
+
+        The one minor deviation is the registration location: the reference implementation
+        specifies registration should be in `internal/controller/podplacement/metrics/`
+        (the controller metrics package) with an `init()` function, but the agent
+        placed it in `pkg/image/metrics/common_metrics.go` using the `InitCommonMetrics()`
+        pattern. While the agent''s choice is defensible because it follows the existing
+        pattern in that file and ensures the metric is initialized before use (since
+        `InitCommonMetrics()` is called at the top of the cache proxy), it doesn''t
+        match the reference''s specified location. The metric name prefix `mto_ppo_ctrl_`
+        suggests it belongs in the controller metrics package. This is a minor convention
+        deviation rather than a major one, since the agent still used `MustRegister`
+        on the controller-runtime registry and followed the file''s existing initialization
+        pattern faithfully.'
+      value: 4
+    efficiency:
+      judge_type: check
+      rationale: 'Excessive: 133 turns, $8.05'
+      value: false
+    hallucination_check:
+      judge_type: llm
+      rationale: 'The implementation appears largely grounded and follows existing
+        patterns correctly. Let me analyze each aspect:
+
+
+        **Correct references:**
+
+        1. The metric name `mto_ppo_ctrl_image_cache_hits_total` uses the correct
+        `mto_ppo_ctrl_` prefix as specified in the reference.
+
+        2. Uses `prometheus.CounterVec` which is the correct type.
+
+        3. Has `image_ref` label as required.
+
+        4. Instrumented in the cache hit path in `pkg/image/cache.go`, not the registry
+        fetch path.
+
+
+        **Potential concerns:**
+
+        1. The agent placed the metric in `pkg/image/metrics/common_metrics.go` rather
+        than `internal/controller/podplacement/metrics/` as the reference suggests.
+        However, the agent appeared to explore the codebase and found the existing
+        metrics pattern is in `pkg/image/metrics/`, so this could be a legitimate
+        adaptation to the actual codebase structure.
+
+        2. The agent references `metrics2.Registry.MustRegister` using `sigs.k8s.io/controller-runtime/pkg/metrics`
+        — this appears to follow the existing pattern in the file.
+
+        3. The agent references existing variables like `InspectionGauge`, `TimeToInspectImageGivenHit`,
+        `TimeToInspectImageGivenMiss` and the `InitCommonMetrics()` function pattern
+        — these appear to be existing code being reproduced.
+
+        4. The agent references `c.imageRefsCache.Get(hash)` and `imageReference`
+        variable in cache.go — these appear to reference existing code.
+
+        5. Uses `prometheus.Labels{"image_ref": imageReference}` with `.With()` instead
+        of `.WithLabelValues(imageReference)` — both are valid Prometheus client_golang
+        APIs, just different styles.
+
+        6. References `utils.Buckets()` and `utils.HistogramObserve()` — these appear
+        to be existing utility functions.
+
+
+        **No clear hallucinations found.** The agent references existing packages,
+        methods, file paths, and APIs that are consistent with the codebase structure
+        it explored. The metric registration follows the existing pattern in the same
+        file. While the placement differs from the reference (pkg/image/metrics vs
+        internal/controller/podplacement/metrics), this appears to be an intentional
+        choice based on the actual codebase structure rather than a hallucination.
+
+
+        The implementation is grounded — all references to supposedly existing code
+        appear valid, and new additions are clearly marked as new.'
+      value: 3
+    task_success:
+      judge_type: llm
+      rationale: 'The agent correctly implements the metric with the right name (`mto_ppo_ctrl_image_cache_hits_total`),
+        type (`prometheus.CounterVec`), label (`image_ref`), and registers it via
+        `metrics2.Registry.MustRegister`. The instrumentation is correctly placed
+        in the cache hit path in `cache.go`. The minor differences from the reference
+        are: (1) the metric is registered in `pkg/image/metrics/common_metrics.go`
+        rather than in `internal/controller/podplacement/metrics/` as the reference
+        suggests, though this follows the existing codebase pattern for image-related
+        metrics; (2) it uses `.With(prometheus.Labels{"image_ref": imageReference})`
+        instead of `.WithLabelValues(imageRef)`, which is functionally equivalent
+        but requires an extra import of the prometheus package. These are minor stylistic/organizational
+        differences that wouldn''t affect functionality.'
+      value: 4
+  mto-004-webhook-validation:
+    code_correctness:
+      judge_type: llm
+      rationale: 'The implementation has several notable issues compared to the reference:
+
+
+        1. **Does not use `field.Invalid` for structured errors**: The reference explicitly
+        requires using `field.Invalid(field.NewPath("spec", "plugins", "nodeAffinityScoring",
+        "platforms"), ...)` for structured error reporting. The agent''s implementation
+        just returns the raw error from `ValidateArchitecturesSet()` directly (`return
+        nil, err`), which doesn''t follow the webhook error pattern specified in the
+        reference.
+
+
+        2. **Incorrect return type from `ValidateArchitecturesSet()`**: The agent
+        writes `if _, err := cppc.Spec.Plugins.NodeAffinityScoring.ValidateArchitecturesSet();
+        err != nil {` with two return values, but the reference shows `ValidateArchitecturesSet()`
+        returns only an `error`. If the actual method returns only one value, this
+        code would not compile.
+
+
+        3. **No use of `field.Invalid` or `field.ErrorList`**: The reference specifically
+        calls for using `allErrs = append(allErrs, field.Invalid(...))` and returning
+        `allErrs.ToAggregate()`. The agent completely omits this pattern.
+
+
+        4. **Test file uses `testing` package instead of Ginkgo**: The reference specifies
+        tests should use the builder API and Ginkgo structure (`Describe`/`Context`/`It`/`Expect`).
+        The agent uses standard Go `testing` with table-driven tests instead.
+
+
+        5. **Test types may be incorrect**: The tests reference `plugins.NodeAffinityScoringPlatformTerm`
+        and `plugins.Plugins`, but the reference uses `commonv1alpha1.Platform` -
+        these may not match the actual types in the codebase.
+
+
+        The core logic (calling `ValidateArchitecturesSet()` with nil guards, applied
+        to both create and update) is correct in concept, but the implementation details
+        have multiple errors that would likely prevent compilation and don''t match
+        the required patterns.'
+      value: 3
+    consulted_docs:
+      judge_type: builtin
+      rationale: Read 0/2 expected docs (coverage 0%, threshold 0%)
+      value: true
+    convention_adherence:
+      judge_type: llm
+      rationale: 'The agent''s implementation has several significant convention deviations:
+
+
+        1. **Ginkgo test structure**: The repo convention explicitly states tests
+        use `Describe/Context/It` BDD hierarchy with Ginkgo, but the agent wrote standard
+        Go `func Test*` with `t.Run` table-driven tests. This is a major convention
+        violation.
+
+
+        2. **Fluent builder API**: The repo convention requires test code to create
+        Kubernetes objects using `pkg/testing/builder` fluent builders (e.g., `builder.NewClusterPodPlacementConfig().WithNodeAffinityScoring(...).Build()`),
+        but the agent used raw struct literals (`&ClusterPodPlacementConfig{Spec:
+        ClusterPodPlacementConfigSpec{...}}`). This is another major convention violation.
+
+
+        3. **No `field.Invalid` structured error**: The reference implementation specifies
+        using `field.Invalid` from `k8s.io/apimachinery/pkg/util/validation/field`
+        for structured errors with field paths, but the agent''s `validate()` method
+        simply returns the raw error from `ValidateArchitecturesSet()` without wrapping
+        it in a `field.Invalid` call. The reference explicitly lists "Uses `field.Invalid`
+        for structured error (not a raw `fmt.Errorf`)" as a Score 5 criterion.
+
+
+        4. **`ValidateArchitecturesSet()` call signature**: The agent calls it as
+        `cppc.Spec.Plugins.NodeAffinityScoring.ValidateArchitecturesSet()` capturing
+        two return values `(_, err)`, which may not match the actual method signature
+        (the reference shows it returning only an error).
+
+
+        On the positive side, the agent does correctly call `ValidateArchitecturesSet()`
+        instead of reimplementing the logic, applies nil-guards for `Spec.Plugins`
+        and `NodeAffinityScoring`, and covers both `ValidateCreate` and `ValidateUpdate`.
+        However, the two major test convention violations (no Ginkgo, no builder API)
+        and the missing `field.Invalid` structured error represent substantial departures
+        from repository conventions.'
+      value: 2
+    efficiency:
+      judge_type: check
+      rationale: 'Excessive: 133 turns, $8.05'
+      value: false
+    hallucination_check:
+      judge_type: llm
+      rationale: 'The implementation has several potential hallucination issues:
+
+
+        1. **`ValidateArchitecturesSet()` return signature**: The reference implementation
+        shows `ValidateArchitecturesSet()` returning only an `error`, but the agent''s
+        code calls it as `if _, err := cppc.Spec.Plugins.NodeAffinityScoring.ValidateArchitecturesSet();
+        err != nil` — suggesting it returns two values. This could be a hallucination
+        about the method''s return signature, though it''s possible the actual method
+        returns two values.
+
+
+        2. **Import path `github.com/openshift/multiarch-tuning-operator/api/common/plugins`**:
+        The reference implementation uses `commonv1alpha1.Platform` types, suggesting
+        the types are in a `common/v1alpha1` package. The agent uses `plugins.Plugins`,
+        `plugins.NodeAffinityScoring`, and `plugins.NodeAffinityScoringPlatformTerm`
+        from a `api/common/plugins` package. This could be a valid package path, but
+        it differs from what the reference suggests.
+
+
+        3. **Type names**: The agent uses `plugins.NodeAffinityScoringPlatformTerm`
+        while the reference uses `commonv1alpha1.Platform`. These are different type
+        names - one or both could be correct depending on the actual codebase.
+
+
+        4. **Missing `field.Invalid` structured error**: The reference explicitly
+        requires using `field.Invalid` for structured Kubernetes API errors, but the
+        agent simply returns the raw error from `ValidateArchitecturesSet()`. This
+        is a functional deviation but not a hallucination per se.
+
+
+        5. **No use of builder API or Ginkgo**: The reference specifies tests should
+        use the builder API and Ginkgo structure, but the agent uses standard Go testing.
+        This is a quality issue but not a hallucination.
+
+
+        The agent''s code does call `ValidateArchitecturesSet()` (existing method),
+        has nil-guards, and applies validation in both ValidateCreate and ValidateUpdate.
+        However, the return value handling (`_, err :=` vs just `err`) and the type
+        names used suggest the agent may have invented or guessed at the actual API.
+        The import path and type names could be hallucinated since they differ from
+        what the reference implementation suggests exists in the codebase.'
+      value: 2
+    task_success:
+      judge_type: llm
+      rationale: 'The agent correctly calls `ValidateArchitecturesSet()` instead of
+        reimplementing inline duplicate checking, and properly nil-guards both `Spec.Plugins`
+        and `Spec.Plugins.NodeAffinityScoring`. The validation is applied in both
+        `ValidateCreate` and `ValidateUpdate` paths. However, there are significant
+        gaps: (1) The agent does NOT use `field.Invalid` for structured Kubernetes
+        API error reporting as required — it returns the raw error from `ValidateArchitecturesSet()`
+        directly instead of wrapping it with `field.Invalid(field.NewPath("spec",
+        "plugins", "nodeAffinityScoring", "platforms"), ...)` and using `field.ErrorList`
+        / `allErrs.ToAggregate()`. (2) The unit tests use standard Go `testing` package
+        table-driven tests rather than the Ginkgo/Gomega builder-based pattern specified
+        in the reference. (3) The `ValidateArchitecturesSet()` call uses `if _, err
+        :=` suggesting it returns two values, but the reference shows it returns only
+        an error — this may cause a compilation error depending on the actual function
+        signature. These issues prevent a score of 4 or 5.'
+      value: 3
+  mto-005-promql-alert:
+    code_correctness:
+      judge_type: llm
+      rationale: 'The agent''s implementation meets all the key correctness criteria:
+
+
+        1. **Correct metric names**: Uses `mto_ppo_ctrl_failed_image_inspection_total`
+        and `mto_ppo_ctrl_processed_pods_total` exactly as documented.
+
+        2. **Correct threshold**: Uses `0.05` (5%), matching the documented SLO.
+
+        3. **Valid PrometheusRule YAML structure**: The YAML is well-formed with correct
+        `apiVersion: monitoring.coreos.com/v1`, `kind: PrometheusRule`, and proper
+        `spec.groups[].rules[]` structure.
+
+        4. **Correct `rate()` usage**: Applies `rate()` to both counters with a `[5m]`
+        window, which is the correct approach for Prometheus counters.
+
+        5. **`for: 5m`**: Correctly prevents flapping from transient errors.
+
+        6. **`severity: critical`**: Matches the SLO importance level.
+
+        7. **Human-readable annotation message**: Includes `{{ $value | humanizePercentage
+        }}` for the current value and actionable context about potential causes.
+
+        8. **Kustomize integration**: The approach of adding a `config/monitoring/`
+        directory with its own `kustomization.yaml` and wiring it into `config/default/kustomization.yaml`
+        is a standard and correct pattern for kubebuilder-based projects.
+
+        9. **Namespace `system`**: Correctly follows the existing convention where
+        kustomize''s namespace transformer will replace it with the actual deployment
+        namespace.
+
+
+        The only minor differences from the reference are cosmetic: the resource name
+        is `image-inspection-failure-rate` instead of `multiarch-tuning-operator-alerts`,
+        the namespace uses `system` (relying on kustomize transformation) instead
+        of hardcoding the final namespace, and additional labels are included. None
+        of these affect correctness — they''re actually more idiomatic for a kustomize-based
+        project. The implementation would work correctly as-is.'
+      value: 5
+    consulted_docs:
+      judge_type: builtin
+      rationale: Read 0/1 expected docs (coverage 0%, threshold 0%)
+      value: true
+    convention_adherence:
+      judge_type: llm
+      rationale: 'The implementation follows all key correctness criteria and repository
+        conventions:
+
+
+        1. **Correct metric names**: Uses `mto_ppo_ctrl_failed_image_inspection_total`
+        and `mto_ppo_ctrl_processed_pods_total` with the required `mto_ppo_ctrl_*`
+        prefix — matching the convention from the metrics package.
+
+        2. **Correct threshold**: Uses exactly `0.05` (5%) as specified by the SLO
+        documentation.
+
+        3. **Correct PromQL**: Uses `rate()` on counters with a `[5m]` window, not
+        `irate()` or raw counter values.
+
+        4. **Valid PrometheusRule YAML**: Proper `apiVersion: monitoring.coreos.com/v1`,
+        `kind: PrometheusRule`, with `for: 5m` and `severity: critical`.
+
+        5. **Human-readable annotation**: The `message` annotation includes `{{ $value
+        | humanizePercentage }}` and actionable troubleshooting guidance.
+
+        6. **Repository conventions followed**: The namespace is set to `system` matching
+        the existing `ServiceMonitor` convention in `config/prometheus/monitor.yaml`,
+        correctly relying on kustomize''s namespace transformer to rewrite it. The
+        kustomization integration follows the existing pattern of adding resources
+        under `config/default/kustomization.yaml` and `config/prometheus/kustomization.yaml`.
+        The labels follow the standard `app.kubernetes.io/*` convention used elsewhere
+        in the project.
+
+        7. **No convention violations**: No tests were required for this task (it''s
+        a pure YAML/kustomize change), so test conventions (Ginkgo, builder API) are
+        not applicable. No controller code was written, so CPPC access pattern and
+        code generation order are not applicable.
+
+
+        A senior maintainer would find this implementation clean and idiomatic with
+        no convention-related review comments needed.'
+      value: 5
+    efficiency:
+      judge_type: check
+      rationale: 'Excessive: 133 turns, $8.05'
+      value: false
+    hallucination_check:
+      judge_type: llm
+      rationale: "The agent's implementation is well-grounded and meets all key correctness\
+        \ criteria:\n\n1. **Correct metric names**: Uses `mto_ppo_ctrl_failed_image_inspection_total`\
+        \ and `mto_ppo_ctrl_processed_pods_total` — exactly matching the documented\
+        \ metrics from the codebase.\n\n2. **Correct threshold**: Uses `> 0.05` (5%),\
+        \ matching the documented SLO threshold.\n\n3. **Valid PrometheusRule YAML\
+        \ structure**: The YAML is properly structured with `apiVersion: monitoring.coreos.com/v1`,\
+        \ `kind: PrometheusRule`, proper `spec.groups` with rules.\n\n4. **Correct\
+        \ `rate()` function**: Applied `rate()` to counters over a `[5m]` window,\
+        \ which is the correct approach for counter metrics.\n\n5. **`for: 5m`**:\
+        \ Included to prevent flapping from transient errors.\n\n6. **`severity: critical`**:\
+        \ Matches the SLO importance level.\n\n7. **Human-readable annotations**:\
+        \ The `message` annotation includes `{{ $value | humanizePercentage }}` and\
+        \ describes actionable context.\n\n8. **No hallucinations detected**: \n \
+        \  - The metric names are confirmed from `internal/controller/podplacement/metrics/controller.go`\n\
+        \   - The reference to existing `ServiceMonitor` in `config/prometheus/monitor.yaml`\
+        \ follows existing project patterns\n   - The `namespace: system` convention\
+        \ is consistent with existing kustomize patterns\n   - File paths referenced\
+        \ (like `config/default/kustomization.yaml`, `config/prometheus/kustomization.yaml`)\
+        \ are standard kubebuilder/operator-sdk project paths\n   - The RBAC reference\
+        \ to `prometheusrules` is grounded in the codebase\n   - No invented packages,\
+        \ methods, fields, or make targets\n\nThe implementation creates new files\
+        \ (`config/monitoring/prometheus-alert.yaml`, `config/monitoring/kustomization.yaml`)\
+        \ which is acceptable, and modifies existing files in a way consistent with\
+        \ the project structure. All references to existing code artifacts appear\
+        \ correct."
+      value: 5
+    task_success:
+      judge_type: llm
+      rationale: 'The agent''s implementation meets all key correctness criteria from
+        the reference:
+
+
+        1. **Correct metric names**: Uses `mto_ppo_ctrl_failed_image_inspection_total`
+        and `mto_ppo_ctrl_processed_pods_total` — exactly matching the documented
+        metrics.
+
+        2. **Correct threshold**: Uses `> 0.05` (5%), matching the documented SLO.
+
+        3. **Valid PrometheusRule YAML structure**: Proper `apiVersion: monitoring.coreos.com/v1`,
+        `kind: PrometheusRule`, with correct `spec.groups` structure.
+
+        4. **`rate()` function applied correctly** to both counters with a `[5m]`
+        window.
+
+        5. **`for: 5m`** to prevent flapping from transient errors.
+
+        6. **`severity: critical`** matching the SLO importance.
+
+        7. **Human-readable annotation message** with `{{ $value | humanizePercentage
+        }}` template.
+
+        8. **Proper kustomize integration** — the agent went beyond the reference
+        by also wiring the new resource into `config/default/kustomization.yaml` and
+        `config/prometheus/kustomization.yaml`, which is good operational practice.
+
+
+        Minor cosmetic differences (metadata name `image-inspection-failure-rate`
+        vs `multiarch-tuning-operator-alerts`, namespace `system` vs `multiarch-tuning-operator`,
+        additional labels) are reasonable project-convention choices that don''t affect
+        correctness. The namespace choice of `system` is actually well-justified since
+        the existing ServiceMonitor uses this convention with kustomize namespace
+        transformation.'
+      value: 5
+  mto-006-new-execution-mode:
+    code_correctness:
+      judge_type: llm
+      rationale: 'The implementation is largely correct and follows the existing codebase
+        conventions well. The key elements are present:
+
+
+        1. **New package created** at `internal/controller/metricsaggregator/` — correct.
+
+        2. **Mutual exclusion** updated in `validateFlags` — correct, includes both
+        the "at least one" and "only one" checks.
+
+        3. **Flag binding** added in `bindFlags` — correct.
+
+        4. **Leader election ID** uses the prefix pattern (`metrics-aggregator-208d7abd.multiarch.openshift.io`)
+        — this follows the existing codebase pattern of prefixing the base leader
+        ID rather than using a fully separate constant. The reference wanted a unique
+        constant like `metricsAggregatorLeaderElectionID`, but the agent''s approach
+        is consistent with how the existing code handles it, so this is functionally
+        equivalent and correct.
+
+        5. **`SetupWithManager` and `RunMetricsAggregator`** follow the same patterns
+        as existing modes like `RunENoExecEventControllers`.
+
+        6. **Import paths** appear correct for the repository''s module structure.
+
+
+        Minor issues:
+
+        - The reference specifies that the reconciler should use `Named("metrics-aggregator")`
+        without a `For()` clause, but the agent''s implementation uses `.For(&multiarchv1beta1.ClusterPodPlacementConfig{})`.
+        This is a design deviation — the reference''s stub reconciler has no watches,
+        while the agent''s watches CPPC objects. This changes the controller''s behavior
+        and also requires the reconciler to embed `client.Client` and implement the
+        `client.Client` interface, adding unnecessary fields. However, this would
+        still compile and function.
+
+        - The reference wanted the CPPC informer to be explicitly started in the new
+        mode''s setup block, but the agent relies on the existing `enableCPPCInformer`
+        flag mechanism. This is a valid approach given the codebase structure but
+        differs from the reference''s explicit requirement.
+
+        - The reconciler struct has extra fields (Client, ClientSet, Scheme, Recorder)
+        that the reference''s minimal stub doesn''t have. While not incorrect, it''s
+        over-engineered for a stub.
+
+
+        Overall the code would compile and function correctly, with the main deviation
+        being the `For()` watch on CPPC instead of using `Named()` without watches.'
+      value: 4
+    consulted_docs:
+      judge_type: builtin
+      rationale: Read 0/3 expected docs (coverage 0%, threshold 0%)
+      value: true
+    convention_adherence:
+      judge_type: llm
+      rationale: 'The implementation follows most conventions correctly:
+
+
+        **Followed conventions:**
+
+        - **Execution mode conventions**: New flag added with mutual exclusion via
+        `btoi` sum pattern, matching existing `validateFlags` structure.
+
+        - **Leader election ID**: Unique prefix `metrics-aggregator-` prepended to
+        the base ID, following the same pattern as `operator-`, `ppc-controllers-`,
+        and `enoexecevent-controllers-`.
+
+        - **Controller package layout**: New package at `internal/controller/metricsaggregator/`
+        matching existing packages like `enoexecevent`, `operator`, `podplacement`.
+
+        - **SetupWithManager pattern**: `RunMetricsAggregator` follows the exact same
+        structure as `RunENoExecEventControllers` with `config`, `clientset`, `must()`
+        wrapping the `SetupWithManager` call, same error constants.
+
+        - **Flag binding**: `--enable-metrics-aggregator` registered in `bindFlags`
+        following the same pattern as other flags.
+
+
+        **Minor deviations:**
+
+        - The reconciler uses `For(&multiarchv1beta1.ClusterPodPlacementConfig{})`
+        which directly watches CPPC resources, whereas the reference implementation
+        uses `Named("metrics-aggregator")` without a `For()` clause. The reference
+        implementation has a more minimal reconciler. However, the agent''s approach
+        of watching CPPC is still reasonable for a metrics aggregator that needs CPPC
+        state.
+
+        - The reconciler struct includes extra fields (`Client`, `ClientSet`, `Scheme`,
+        `Recorder`) which adds unnecessary complexity compared to the reference''s
+        empty struct, though this follows the pattern of other existing reconcilers
+        in the codebase (like `PodReconciler`), so it''s actually more consistent
+        with the broader codebase conventions.
+
+        - The CPPC informer is not explicitly started in the new mode''s setup block
+        — the reference notes "CPPC informer must be started before the manager if
+        the controller needs CPPC config." The agent relies on the `--enable-cppc-informer`
+        flag being set separately, which is how the codebase works but differs from
+        the reference which expected it to be started within the mode block.
+
+
+        Overall, these are minor deviations — the implementation is quite idiomatic
+        and follows the codebase patterns well. A maintainer might note the unnecessary
+        struct fields or the CPPC watch approach but these align with existing patterns
+        in the codebase.'
+      value: 4
+    efficiency:
+      judge_type: check
+      rationale: 'Excessive: 133 turns, $8.05'
+      value: false
+    hallucination_check:
+      judge_type: llm
+      rationale: 'The implementation is largely grounded and follows existing patterns
+        correctly. Let me analyze the key aspects:
+
+
+        **Correct references:**
+
+        - Import paths like `github.com/openshift/multiarch-tuning-operator/api/v1beta1`,
+        `github.com/openshift/multiarch-tuning-operator/internal/controller/operator`,
+        etc. follow the existing project structure.
+
+        - The `must()`, `btoi()`, `validateFlags()`, `bindFlags()` functions match
+        the existing codebase patterns.
+
+        - The `RunMetricsAggregator` function follows the same pattern as `RunENoExecEventControllers`.
+
+        - The leader election ID construction pattern (`fmt.Sprintf("metrics-aggregator-%s",
+        leaderID)`) matches how other modes construct theirs.
+
+        - The `utils.OperatorName`, `utils.Namespace()`, `utils.AtomicLevel` references
+        appear consistent with the existing codebase.
+
+        - The `kubernetes.NewForConfigOrDie`, `ctrl.GetConfigOrDie()` calls are standard
+        controller-runtime patterns.
+
+        - Constants like `unableToCreateController`, `controllerKey` are defined in
+        the file.
+
+
+        **Potential concerns:**
+
+        1. The reconciler struct includes `Client`, `ClientSet`, `Scheme`, `Recorder`
+        fields - these are reasonable additions for a new type being created, following
+        patterns from existing reconcilers like `PodReconciler`.
+
+        2. The `SetupWithManager` uses `.For(&multiarchv1beta1.ClusterPodPlacementConfig{})`
+        - this differs from the reference which uses `.Named("metrics-aggregator").Complete(r)`
+        without a `For()`. The reference implementation is a simpler stub. The agent''s
+        version watches ClusterPodPlacementConfig objects, which may or may not be
+        appropriate, but `ClusterPodPlacementConfig` is a real type in the codebase.
+
+        3. The import of `multiarchv1alpha1` in the full main.go appears consistent
+        with the existing code.
+
+        4. The `enableCPPCInformer` flag and its usage appear to match existing patterns
+        in the codebase.
+
+
+        **Key deviation from reference:**
+
+        - The reference specifies a unique leader election ID as a constant (e.g.,
+        `multiarch-tuning-operator-metrics-aggregator.multiarch.openshift.io`), while
+        the agent uses a prefix-based approach (`fmt.Sprintf("metrics-aggregator-%s",
+        leaderID)`). This follows the existing pattern in the codebase for other modes,
+        so it''s actually more consistent with the actual code.
+
+        - The reference mentions starting the CPPC informer in the new mode''s setup
+        block, but the agent relies on the existing `enableCPPCInformer` flag mechanism,
+        which is the actual pattern used in the codebase.
+
+        - The reconciler is more complex than the reference (has extra fields and
+        watches CPPC), but this is a design choice, not a hallucination.
+
+
+        **No clear hallucinations found.** All referenced packages, types, methods,
+        fields, and APIs appear to exist in the codebase. The new code being created
+        (reconciler struct, RunMetricsAggregator function) is clearly new additions
+        following existing patterns. The implementation is grounded in the actual
+        codebase structure.'
+      value: 3
+    task_success:
+      judge_type: llm
+      rationale: "The agent correctly implemented all the major requirements: (1)\
+        \ new package at `internal/controller/metricsaggregator/` with a reconciler\
+        \ following existing patterns, (2) `--enable-metrics-aggregator` flag added\
+        \ in `bindFlags`, (3) mutual exclusion updated in `validateFlags` for both\
+        \ the \"at least one\" and \"only one\" checks, (4) leader election ID constructed\
+        \ with `metrics-aggregator-` prefix following the existing pattern, (5) `RunMetricsAggregator`\
+        \ function created and called in `main()`, and (6) `SetupWithManager` follows\
+        \ the same pattern as other modes. \n\nThe minor deviations from the reference\
+        \ are: (1) the leader election ID uses the prefix-based format (`metrics-aggregator-208d7abd.multiarch.openshift.io`)\
+        \ rather than a dedicated constant with the full domain format (`multiarch-tuning-operator-metrics-aggregator.multiarch.openshift.io`)\
+        \ as specified in the reference — though this follows the existing codebase\
+        \ convention; (2) the reconciler includes extra fields (Client, ClientSet,\
+        \ Scheme, Recorder) and watches `ClusterPodPlacementConfig` via `.For()` rather\
+        \ than using `.Named()` as in the reference — this is more feature-rich but\
+        \ diverges from the minimal stub; (3) the CPPC informer is not explicitly\
+        \ started in the new mode's setup block but is handled via the existing `--enable-cppc-informer`\
+        \ flag mechanism. These are minor differences that wouldn't prevent the code\
+        \ from working."
+      value: 4
+run_id: baseline-run-2
+run_metrics:
+  cache_hit_rate: 0.935493
+  cost_per_mtok_usd: 1.1203
+  cost_per_turn_usd: 0.060526
+  output_tokens_per_turn: 562.09

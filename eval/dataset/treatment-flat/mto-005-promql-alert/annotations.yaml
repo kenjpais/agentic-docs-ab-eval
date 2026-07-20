@@ -1,0 +1,12 @@
+repo: multiarch-tuning-operator
+category: observability
+complexity: low
+expected_files:
+  - agentic/RELIABILITY.md
+notes: >
+  This is a binary correctness test: either the agent uses the documented SLO threshold (5%)
+  and documented metric names, or it invents them. Without RELIABILITY.md, agents produce
+  plausible-looking but wrong alerts (wrong threshold, wrong metric names). With RELIABILITY.md,
+  they can copy the exact values. This task has the highest expected treatment/baseline delta.
+
+reference: reference.md
