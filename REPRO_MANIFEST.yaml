@@ -84,10 +84,6 @@ evaluation:
     - hallucination_check (LLM, 1-5)
     - efficiency (inline check, 0/1)
     - consulted_docs (builtin, pass/fail, min_coverage=0.5)
-  statistical_tests:
-    - Wilcoxon signed-rank (paired, non-parametric)
-    - Cohen's d (pooled SD effect size)
-    - Bootstrap 95% CI (1000 iterations, RNG_SEED=42)
 
 artifacts:
   metrics_csv: metrics.csv          # 165 rows: run × case × condition × scores
@@ -97,12 +93,7 @@ artifacts:
   run_summaries: eval/runs/agentic-docs-ab-eval/*/summary.yaml
 
 reproduce:
-  tier1_reanalyze: |
-    # Re-analyze frozen scores without re-running the experiment
-    1. Load metrics.csv into analysis.ipynb or a stats script
-    2. Verify IDV, Wilcoxon p-values, and CIs match RESULTS.md within rounding
-    3. Confirm: RNG_SEED=42, N_BOOTSTRAP=1000
-  tier2_rerun: |
+  rerun: |
     # Re-run the experiment (expensive; not bit-identical due to model non-determinism)
     1. Install claude-code 2.1.218 and agent-eval-harness (same versions)
     2. Set ANTHROPIC_API_KEY

@@ -1,45 +1,33 @@
 # Agentic Documentation A/B Evaluation
 
-A controlled experiment measuring whether generated agentic documentation (AGENTS.md + `agentic/` tree) improves AI coding agent performance on Kubernetes operator tasks.
+Does adding generated agentic documentation (AGENTS.md + `agentic/` tree) improve AI coding agent performance on Kubernetes operator tasks?
+
+**Result: No clear improvement detected across 165 invocations (11 tasks × 5 runs × 3 conditions).**
 
 ## Conditions
 
-| Condition | Description | Dataset |
-|-----------|-------------|---------|
-| Baseline | CLAUDE.md only, no agentic docs | `eval/dataset/baseline-flat` |
-| Treatment-v1 | Full agentic docs, no explicit read instruction | `eval/dataset/treatment-flat` |
-| Treatment-v2 | Full agentic docs + AGENTS.md read instruction in system prompt | `eval/dataset/treatment-flat` |
+| Condition | Description |
+|-----------|-------------|
+| Baseline | CLAUDE.md only, no agentic docs |
+| Treatment-v1 | Agentic docs present, no explicit read instruction |
+| Treatment-v2 | Agentic docs present + AGENTS.md read instruction in system prompt |
 
-11 tasks × 5 runs per condition = 55 scored pairs each. Judges: `task_success`, `code_correctness`, `convention_adherence`, `hallucination_check` (1–5 scale, claude-opus-4-6).
+## Scores (task_success, 1–5)
 
-## Result
+| Condition | Mean |
+|-----------|------|
+| Baseline | 3.98 |
+| Treatment-v1 | 3.86 |
+| Treatment-v2 | 3.91 |
 
-**Null result — H₀ not rejected.** No statistically significant improvement detected for either treatment. Treatment-v2 showed a directional pairwise preference (40.7% win rate) but did not reach the pre-registered 55% threshold. All Wilcoxon p-values > 0.05. Full analysis: [RESULTS.md](RESULTS.md).
-
-## Repo Layout
-
-```
-eval-baseline.yaml          eval config — baseline condition
-eval-treatment.yaml         eval config — treatment-v1
-eval-treatment-v2.yaml      eval config — treatment-v2
-eval/
-  dataset/                  test cases (input.yaml, reference.md, annotations.yaml)
-  judges/                   LLM judge prompts
-  runs/                     raw per-case outputs and summaries
-metrics.csv                 aggregated scores across all runs
-mlflow.db                   MLflow backend store
-RESULTS.md                  full statistical report
-REPRO_MANIFEST.yaml         environment and reproduction instructions
-```
+High-complexity tasks showed the only directional improvement (+0.20 for v2). Full breakdown in [RESULTS.md](RESULTS.md).
 
 ## Reproduce
 
 ```bash
-# run baseline (requires eval harness)
-/eval-run --config eval-baseline.yaml
-
-# view results in MLflow UI (served from mlflow.db)
 mlflow ui --backend-store-uri sqlite:///mlflow.db --port 5000
+# /eval-run --config eval-baseline.yaml
+# /eval-run --config eval-treatment-v2.yaml
 ```
 
-See [REPRO_MANIFEST.yaml](REPRO_MANIFEST.yaml) for exact environment, model versions, and dataset hashes.
+See [REPRO_MANIFEST.yaml](REPRO_MANIFEST.yaml) for environment details and pinned repo SHAs.
