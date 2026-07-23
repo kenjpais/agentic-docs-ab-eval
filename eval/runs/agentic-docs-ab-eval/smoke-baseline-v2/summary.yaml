@@ -1,0 +1,183 @@
+judges:
+  code_correctness:
+    mean: 5.0
+    pass_rate: null
+  consulted_docs:
+    mean: 1.0
+    pass_rate: 1.0
+  convention_adherence:
+    mean: 5.0
+    pass_rate: null
+  efficiency:
+    mean: 1.0
+    pass_rate: 1.0
+  hallucination_check:
+    mean: 4.0
+    pass_rate: null
+  task_success:
+    mean: 5.0
+    pass_rate: null
+per_case:
+  cm-001-certmanager-cel:
+    code_correctness:
+      judge_type: llm
+      rationale: 'The agent''s implementation is fully correct:
+
+
+        1. **Correct XValidation marker syntax**: Uses `+kubebuilder:validation:XValidation:rule="self.metadata.name
+        == ''cluster''",message="..."` which is the correct kubebuilder marker format.
+
+
+        2. **CEL rule syntax**: Uses `self.metadata.name == ''cluster''` with single
+        quotes around ''cluster'', which is correct CEL syntax. `self` correctly refers
+        to the object being validated.
+
+
+        3. **Marker placement**: The marker is placed directly above the `type CertManager
+        struct` declaration, which is the correct position for type-level kubebuilder
+        markers.
+
+
+        4. **Make target**: Correctly identifies `make manifests` as the required
+        command to regenerate CRD YAML.
+
+
+        5. **Message text consistency**: The message "CertManager is a singleton,
+        .metadata.name must be ''cluster''" follows the same pattern as TrustManager''s
+        existing message. The reference mentions the pattern should include the full
+        resource path like "CertManager.operator.openshift.io/v1alpha1", but looking
+        at the agent''s message format, it''s a minor stylistic difference — the core
+        pattern of "X is a singleton, .metadata.name must be ''cluster''" is preserved.
+        The agent likely matched the actual TrustManager message in the codebase more
+        closely than the reference''s suggested text.
+
+
+        6. **No invented APIs, correct imports, proper struct context**: The surrounding
+        code context shown is accurate with correct Go types and struct embedding.
+
+
+        The implementation would compile and function correctly, adding CEL-based
+        singleton enforcement at admission time.'
+      value: 5
+    consulted_docs:
+      judge_type: builtin
+      rationale: Read 0/2 expected docs (coverage 0%, threshold 0%)
+      value: true
+    convention_adherence:
+      judge_type: llm
+      rationale: 'The implementation follows all applicable conventions precisely:
+
+
+        1. **Correct XValidation marker syntax**: Uses `+kubebuilder:validation:XValidation:rule="...",message="..."`
+        — the exact kubebuilder marker format required.
+
+
+        2. **CEL rule is correct**: Uses `self.metadata.name == ''cluster''` with
+        single quotes around `''cluster''`, matching the CEL string literal syntax
+        and the pattern from TrustManager.
+
+
+        3. **Marker placement**: The marker is placed directly above the `type CertManager
+        struct` declaration, outside the struct body, consistent with how kubebuilder
+        markers work and matching TrustManager''s pattern.
+
+
+        4. **Message text follows TrustManager''s pattern**: The message `"CertManager
+        is a singleton, .metadata.name must be ''cluster''"` mirrors TrustManager''s
+        existing message pattern. The reference mentions the message should include
+        the full type path like `CertManager.operator.openshift.io/v1alpha1`, but
+        looking at the actual TrustManager convention described, the agent''s message
+        is a reasonable match. The slight difference in message format (omitting the
+        full API path) is minor and the core pattern is preserved.
+
+
+        5. **`make manifests` correctly identified**: The agent correctly identifies
+        `make manifests` as the required command to regenerate CRD YAML.
+
+
+        6. **Singleton enforcement convention**: The implementation enforces the singleton
+        constraint via CEL `x-kubernetes-validations` markers at the API level, exactly
+        matching the cert-manager-operator convention described.
+
+
+        The implementation is fully idiomatic — a senior maintainer would not leave
+        convention-related comments in code review.'
+      value: 5
+    efficiency:
+      judge_type: check
+      rationale: 'Efficient: 7 turns, $0.42'
+      value: true
+    hallucination_check:
+      judge_type: llm
+      rationale: 'The implementation is well-grounded and follows existing patterns
+        correctly:
+
+
+        1. **Correct XValidation marker syntax**: Uses `+kubebuilder:validation:XValidation:rule="self.metadata.name
+        == ''cluster''",message="..."` which matches the kubebuilder marker format.
+
+
+        2. **CEL rule is correct**: Uses `self.metadata.name == ''cluster''` with
+        single quotes around ''cluster'', which is proper CEL syntax.
+
+
+        3. **Marker placement**: Placed above the `type CertManager struct` declaration,
+        which is the correct location for kubebuilder markers.
+
+
+        4. **`make manifests`**: Correctly identified as the make target to regenerate
+        CRDs.
+
+
+        5. **Message text**: Uses "CertManager is a singleton, .metadata.name must
+        be ''cluster''" which is consistent with the TrustManager pattern.
+
+
+        6. **File path**: `api/operator/v1alpha1/certmanager_types.go` is the correct
+        file path as specified in the reference.
+
+
+        7. **No hallucinated references**: The agent references existing kubebuilder
+        markers (`+kubebuilder:object:root=true`, `+kubebuilder:subresource:status`,
+        `+kubebuilder:resource:scope=Cluster`), existing types (`metav1.TypeMeta`,
+        `metav1.ObjectMeta`), and existing fields (`CertManagerSpec`, `CertManagerStatus`)
+        that are consistent with the reference implementation. The existing markers
+        like `+genclient`, `+genclient:nonNamespaced`, `+k8s:deepcopy-gen:interfaces`,
+        and `+operator-sdk:csv:customresourcedefinitions:displayName` are standard
+        markers for this type of operator project.
+
+
+        8. **No invented packages, methods, or file paths**: All references are to
+        things that should exist in the codebase based on the context provided.
+
+
+        One minor note: The message text says "CertManager is a singleton" rather
+        than "CertManager.operator.openshift.io/v1alpha1 is a singleton" as shown
+        in the reference implementation, but the reference also says to follow the
+        TrustManager pattern, and the agent''s phrasing is a reasonable variant. This
+        is a minor inconsistency but not a hallucination.
+
+
+        Overall, the implementation is grounded and correct with no invented references.'
+      value: 4
+    task_success:
+      judge_type: llm
+      rationale: The agent's implementation is fully correct. It identifies the correct
+        file (`api/operator/v1alpha1/certmanager_types.go`), uses the proper `+kubebuilder:validation:XValidation`
+        marker syntax, employs the correct CEL expression `self.metadata.name == 'cluster'`
+        with single quotes, places the marker directly above the `CertManager` struct
+        declaration (outside/above it, not inside), and identifies `make manifests`
+        as the required regeneration command. The message text ("CertManager is a
+        singleton, .metadata.name must be 'cluster'") follows the TrustManager pattern
+        consistently. The only very minor difference from the reference is the message
+        says "CertManager is a singleton" rather than "CertManager.operator.openshift.io/v1alpha1
+        is a singleton", but looking at the actual TrustManager pattern in the codebase,
+        the agent's shorter form is equally valid and consistent. All scoring criteria
+        are met.
+      value: 5
+run_id: smoke-baseline-v2
+run_metrics:
+  cache_hit_rate: 0.824511
+  cost_per_mtok_usd: 1.7102
+  cost_per_turn_usd: 0.06
+  output_tokens_per_turn: 327.29

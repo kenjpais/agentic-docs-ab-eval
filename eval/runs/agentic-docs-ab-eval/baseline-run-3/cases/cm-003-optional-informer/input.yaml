@@ -1,0 +1,13 @@
+repo_path: /Users/kpais/kpais-workspace/a_b_evals/repos/cert-manager-operator-baseline
+task: |
+  Extend pkg/operator/utils/apidiscovery.go with a NewProxyInformerIfAvailable helper
+  following the InitInformerIfAvailable[T] generic pattern already present in that file.
+  The helper should initialize an informer for config.openshift.io/v1 Proxy.
+
+  Thread the resulting OptionalInformer through the TrustManager controller constructor
+  in pkg/controller/trustmanager/controller.go and add a reconcile-time guard using
+  Applicable() that reads cluster proxy settings when the API is available.
+task_id: cm-003-optional-informer
+repo: cert-manager-operator
+category: architecture
+complexity: high

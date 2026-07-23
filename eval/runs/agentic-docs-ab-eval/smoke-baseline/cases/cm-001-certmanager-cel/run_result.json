@@ -1,0 +1,32 @@
+{
+  "exit_code": 0,
+  "duration_s": 301.6,
+  "token_usage": {
+    "input": 4004,
+    "output": 15510,
+    "cache_read": 1284365,
+    "cache_create": 77608
+  },
+  "cost_usd": 1.4722788000000002,
+  "num_turns": 31,
+  "per_model_usage": {
+    "claude-opus-4-6": {
+      "input": 4000,
+      "output": 14954,
+      "cache_read": 1246149,
+      "cache_create": 57803,
+      "cost_usd": 1.3781932500000003
+    },
+    "claude-sonnet-4-6": {
+      "input": 4,
+      "output": 556,
+      "cache_read": 38216,
+      "cache_create": 19805,
+      "cost_usd": 0.09408555000000002
+    }
+  },
+  "per_model_turns": {
+    "claude-opus-4-6": 29,
+    "claude-sonnet-4-6": 2
+  }
+}

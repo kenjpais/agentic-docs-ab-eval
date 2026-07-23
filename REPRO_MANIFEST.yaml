@@ -1,0 +1,127 @@
+campaign: agentic-docs-ab-eval
+campaign_date: 2026-07-24
+version: 1
+
+description: >
+  A/B evaluation of generated agentic documentation (AGENTS.md + agentic/ tree)
+  on Kubernetes operator coding tasks. Three conditions: baseline (no agentic docs),
+  treatment-v1 (agentic docs present, no explicit read instruction),
+  treatment-v2 (agentic docs present, system prompt instructs agent to read AGENTS.md).
+
+environment:
+  claude_code_version: "2.1.218"
+  model_skill: claude-opus-4-6
+  model_judge: claude-opus-4-6
+  model_subagent: claude-sonnet-4-6
+  # agent-eval-harness: version not retrievable via pip; plugin installed
+  platform: darwin
+  date_range: "2026-07"
+
+repositories:
+  cert-manager-operator:
+    upstream: https://github.com/openshift/cert-manager-operator
+    baseline_clone: repos/cert-manager-operator-baseline
+    treatment_clone: repos/cert-manager-operator-treatment
+    pinned_sha: 849995ea92d1a795c72fb1ea2f266ee147ded275
+    docs_quality_score: 85
+    has_claude_md: false
+    note: "No CLAUDE.md in upstream; asymmetry vs multiarch noted in caveats."
+
+  multiarch-tuning-operator:
+    upstream: https://github.com/outrigger-project/multiarch-tuning-operator
+    baseline_clone: repos/multiarch-tuning-operator-baseline
+    treatment_clone: repos/multiarch-tuning-operator-treatment
+    pinned_sha: 21943765a028587358bcec768bb81fd9979c9a83
+    docs_quality_score: 84
+    has_claude_md: true
+
+agentic_docs:
+  generated_by: /create-agentic-docs skill
+  frozen_location: repos/cert-manager-operator-treatment/agentic/ and repos/multiarch-tuning-operator-treatment/agentic/
+  note: >
+    Docs were generated once and frozen in the treatment clones.
+    Re-running /create-agentic-docs would produce different output
+    (skill is not bit-stable). To reproduce: use frozen docs under repos/*-treatment/.
+
+runs:
+  published:
+    - baseline-run-1
+    - baseline-run-2
+    - baseline-run-3
+    - baseline-run-4
+    - baseline-run-5
+    - treatment-v1-run-1    # stored as treatment-run-1
+    - treatment-v1-run-2    # stored as treatment-run-2
+    - treatment-v1-run-3    # stored as treatment-run-3
+    - treatment-v1-run-4    # stored as treatment-run-4
+    - treatment-v1-run-5    # stored as treatment-run-5
+    - treatment-v2-run-1
+    - treatment-v2-run-2
+    - treatment-v2-run-3
+    - treatment-v2-run-4
+    - treatment-v2-run-5
+  excluded_from_headline:
+    - smoke-baseline
+    - smoke-baseline-v2
+
+dataset:
+  tasks: 11
+  cases_per_run: 11
+  total_invocations: 165   # 15 runs × 11 cases
+  task_breakdown:
+    cert-manager-operator: 5
+    multiarch-tuning-operator: 6
+
+evaluation:
+  modes:
+    baseline: prompt mode, no agentic docs, no system prompt directive
+    treatment-v1: case mode, agentic docs present, no explicit read instruction
+    treatment-v2: case mode, agentic docs present, system prompt instructs reading AGENTS.md
+  judges:
+    - task_success (LLM, 1-5)
+    - code_correctness (LLM, 1-5)
+    - convention_adherence (LLM, 1-5)
+    - hallucination_check (LLM, 1-5)
+    - efficiency (inline check, 0/1)
+    - consulted_docs (builtin, pass/fail, min_coverage=0.5)
+  statistical_tests:
+    - Wilcoxon signed-rank (paired, non-parametric)
+    - Cohen's d (pooled SD effect size)
+    - Bootstrap 95% CI (1000 iterations, RNG_SEED=42)
+
+artifacts:
+  metrics_csv: metrics.csv          # 165 rows: run × case × condition × scores
+  analysis_notebook: analysis.ipynb  # MLflow-backed; requires populated mlruns/
+  phase7_results_v1: eval/runs/agentic-docs-ab-eval/phase7_results.json
+  phase7_results_v2: eval/runs/agentic-docs-ab-eval/phase7_v2_results.json
+  run_summaries: eval/runs/agentic-docs-ab-eval/*/summary.yaml
+
+reproduce:
+  tier1_reanalyze: |
+    # Re-analyze frozen scores without re-running the experiment
+    1. Load metrics.csv into analysis.ipynb or a stats script
+    2. Verify IDV, Wilcoxon p-values, and CIs match RESULTS.md within rounding
+    3. Confirm: RNG_SEED=42, N_BOOTSTRAP=1000
+  tier2_rerun: |
+    # Re-run the experiment (expensive; not bit-identical due to model non-determinism)
+    1. Install claude-code 2.1.218 and agent-eval-harness (same versions)
+    2. Set ANTHROPIC_API_KEY
+    3. Checkout repos at pinned SHAs (do NOT re-run /create-agentic-docs)
+    4. Apply frozen treatment docs from repos/*-treatment/agentic/
+    5. Run: /eval-run --config eval-baseline.yaml --run-id baseline-repro-1
+    6. Run: /eval-run --config eval-treatment-v2.yaml --run-id treatment-v2-repro-1
+    7. Log under new experiment name: agentic-docs-ab-eval-replication-YYYYMMDD
+    8. Expect similar direction and magnitude; not identical scores
+
+caveats:
+  - cert-manager-operator has no CLAUDE.md; multiarch-tuning-operator does. This
+    asymmetry may inflate baseline performance for cert-manager tasks.
+  - LLM judges use the same model family (claude-opus-4-6) as the evaluated agent.
+    Self-assessment bias cannot be ruled out.
+  - Tasks are synthetic coding prompts, not real PRs or issues.
+  - Agentic docs were generated (not human-authored); quality scores are self-assessed.
+  - efficiency judge uses per-run totals (all 11 cases combined), not per-case.
+    All runs failed efficiency threshold; this judge contributed 0 to OES for all conditions.
+  - treatment-v1 consulted_docs pass_rate=0.0 (agent read no expected docs without explicit instruction)
+  - Statistical power: n=11 tasks × 5 runs = 55 pairs; designed for 80% power at d=0.5 but
+    actual effect sizes were d<0.20 (negligible).

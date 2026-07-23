@@ -1,0 +1,504 @@
+[
+  {
+    "type": "system",
+    "subtype": "hook_started",
+    "timestamp": "2026-07-20T16:52:54.832Z"
+  },
+  {
+    "type": "system",
+    "subtype": "hook_response",
+    "timestamp": "2026-07-20T16:52:56.663Z"
+  },
+  {
+    "type": "system",
+    "subtype": "init",
+    "timestamp": "2026-07-20T16:52:56.674Z",
+    "model": "claude-opus-4-6"
+  },
+  {
+    "type": "assistant",
+    "text": "I'll start by reading the relevant files to understand the existing patterns.",
+    "tools": [],
+    "timestamp": "2026-07-20T16:53:02.817Z",
+    "_msg_id": "msg_vrtx_01Q8J3Ydy6tCVGRRcMWBV1Tf"
+  },
+  {
+    "type": "assistant",
+    "text": "",
+    "tools": [
+      {
+        "name": "Bash",
+        "id": "toolu_vrtx_01DL3gaMP6BJt1FcGqpLQHe6",
+        "input": {
+          "command": "cd /Users/kpais/kpais-workspace/a_b_evals/repos/cert-manager-operator-treatment && pwd",
+          "description": "Change to the repository directory"
+        }
+      }
+    ],
+    "timestamp": "2026-07-20T16:53:02.935Z",
+    "_msg_id": "msg_vrtx_01Q8J3Ydy6tCVGRRcMWBV1Tf"
+  },
+  {
+    "type": "assistant",
+    "text": "",
+    "tools": [
+      {
+        "name": "Read",
+        "id": "toolu_vrtx_01D5MtTwMCa67gGJv9hequU6",
+        "input": {
+          "file_path": "/Users/kpais/kpais-workspace/a_b_evals/repos/cert-manager-operator-treatment/AGENTS.md"
+        }
+      }
+    ],
+    "timestamp": "2026-07-20T16:53:03.048Z",
+    "_msg_id": "msg_vrtx_01Q8J3Ydy6tCVGRRcMWBV1Tf"
+  },
+  {
+    "type": "tool_result",
+    "tool_use_id": "toolu_vrtx_01D5MtTwMCa67gGJv9hequU6",
+    "tool_name": "Read",
+    "content": "1\t# cert-manager-operator \u2014 Agent Navigation Hub\n2\t\n3\tThe cert-manager Operator for OpenShift installs and manages three PKI-related\n4\toperands on behalf of cluster administrators: cert-manager (the core certificate\n5\tlifecycle controller, webhook, and cainjector), trust-manager (a cluster-wide CA\n6\tbundle distributor), and istio-csr (a gRPC bridge that allows Istio to request\n7\tcertificates from cert-manager). All operator machinery lives in the\n8\t`cert-manager-operator` namespace; all operands deploy into the `cert-manager`\n9\tnamespace (hardcoded). Each operand is governed by a cluster-scoped singleton\n10\tcustom resource (`CertManager/cluster`, `TrustManager/cluster`,\n11\t`IstioCSR/default`), and image references come exclusively from\n12\t`RELATED_IMAGE_*` environment variables injected by OLM.\n13\t\n14\t---\n15\t\n16\t## Component map\n17\t\n18\t| Component | Location | Role |\n19\t|---|---|---|\n20\t| API types | `api/operator/v1alpha1/` | CertManager, TrustManager, IstioCSR CRD structs + CEL validation |\n21\t| cert-manager controllers (library-go) | `pkg/controller/certmanager/` | Deploy/reconcile controller, webhook, cainjector using library-go hooks |\n22\t| TrustManager controller (controller-runtime) | `pkg/controller/trustmanager/` | Deploy trust-manager via SSA; manages CA bundle hash annotation |\n23\t| IstioCSR controller (controller-runtime) | `pkg/controller/istiocsr/` | Deploy istio-csr agent; manages per-namespace singleton |\n24\t| Embedded manifests (bindata) | `bindata/` + `pkg/operator/assets/` | Upstream YAML compiled into the binary via go-bindata |\n25\t| OptionalInformer / API discovery | `pkg/operator/utils/apidiscovery.go` | Detects absent OpenShift APIs (MicroShift compat) |\n26\t| Operator startup | `pkg/cmd/operator/cmd.go`, `pkg/operator/` | library-go `controllercmd` wiring, informer setup |\n27\t| Version/image metadata | `pkg/version/` | Embedded build-time version for status reporting |\n28\t\n29\t---\n30\t\n31\t## Key workflows\n32\t\n33\t### Add a new field to CertManager, TrustManager, or IstioCSR spec\n34\t\n35\t1. Edit the relevant `*_types.go` in `api/operator/v1alpha1/`.\n36\t2. Add kubebuilder marker comments (`+kubebuilder:validation:...`). For\n37\t   fields that must be immutable after first set, add a CEL rule:\n38\t   `+kubebuilder:validation:XValidation:rule=\"oldSelf == '' || self == oldSelf\"`.\n39\t3. Run `make update` to regenerate CRD YAML and deepcopy functions.\n40\t4. Implement the spec field's effect in the matching controller:\n41\t   - **CertManager** \u2192 add a `DeploymentHookFunc` in\n42\t     `pkg/controller/certmanager/` and register it in\n43\t     `newGenericDeploymentController`.\n44\t   - **TrustManager/IstioCSR** \u2192 add a named mutation function and call it\n45\t     from `getDeploymentObject` (after `validateDeploymentManifest`).\n46\t5. Add unit tests in `*_test.go` alongside the new hook/function.\n47\t6. Update e2e tests under `test/e2e/` and verify with `make test-e2e`.\n48\t\n49\t### Add a new operand mutation function (TrustManager / IstioCSR path)\n50\t\n51\t1. Locate `pkg/controller/trustmanager/deployments.go` or\n52\t   `pkg/controller/istiocsr/deployments.go`.\n53\t2. Write a new named function `updateXxx(deployment *appsv1.Deployment, ...) error`.\n54\t3. Call it from `getDeploymentObject`, **after** the\n55\t   `validateDeploymentManifest(deployment)` guard and in the intended application\n56\t   order (image override must come before resource overrides, etc.).\n57\t4. For cert-manager (library-go path): write a `DeploymentHookFunc` in\n58\t   `pkg/controller/certmanager/`, append it to the `hooks` slice inside\n59\t   `newGenericDeploymentController`. Hook ordering matters \u2014 break-glass\n60\t   `withUnsupportedArgsOverrideHook` must remain last.\n61\t5. Run `make test` to confirm existing tests still pass.\n62\t\n63\t### Add an optional informer for a new OpenShift API\n64\t\n65\t1. Define the GVR you need (group, version, resource string).\n66\t2. In `pkg/operator/` (near existing informer wiring), call:\n67\t   ```go\n68\t   myInformer, err := utils.InitInformerIfAvailable(\n69\t       utils.NewResourceDiscoverer(myGVR, discoveryClient),\n70\t       func() myapi.SharedInformerFactory { return myapi.NewSharedInformerFactory(...) },\n71\t   )\n72\t   ```\n73\t3. Pass `myInformer` to the controller constructor.\n74\t4. Inside the controller, guard every use with `myInformer.Applicable()`.\n75\t   When false the controller must degrade gracefully (no-op, not error).\n76\t5. The discoverer treats API-not-found as `(false, nil)`, so MicroShift and\n77\t   vanilla Kubernetes clusters continue to work without the API group.\n78\t\n79\t---\n80\t\n81\t## Troubleshooting quick-reference\n82\t\n83\t| Symptom | One-line solution |\n84\t|---|---|\n85\t| Operator loop-crashes with \"invalid trust-manager deployment manifest\" | The embedded bindata YAML fails `validateDeploymentManifest`; run `make update` and ensure `bindata/trust-manager/` matches the expected schema |\n86\t| Operand pod not restarting after CA bundle ConfigMap update | Check that the SHA-256 annotation (`cert-manager.io/ca-bundle-hash`) on the pod template was updated; the hash covers PEM content, not `resourceVersion` |\n87\t| Immutable field rejection at admission (CEL error) | Attempt to change a `XValidation`-guarded field; delete and recreate the CR, or accept the current value |\n88\t| `RELATED_IMAGE_CERT_MANAGER_*` not found, pod uses wrong image | OLM env injection missing; verify the CSV `relatedImages` section and that the operator pod env vars are set |\n89\t| IstioCSR controller does nothing | Feature gate `IstioCSR=true` must be passed via `--unsupported-addon-features` flag; it is off by default |\n90\t\n91\t---\n92\t\n93\t## Further reading\n94\t\n95\t- [agentic/DESIGN.md](agentic/DESIGN.md) \u2014 architecture decisions and reconciliation flow\n96\t- [agentic/DEVELOPMENT.md](agentic/DEVELOPMENT.md) \u2014 local dev setup, make targets\n97\t- [agentic/TESTING.md](agentic/TESTING.md) \u2014 unit, e2e, and coverage guidance\n98\t- [agentic/RELIABILITY.md](agentic/RELIABILITY.md) \u2014 status conditions, degraded handling\n99\t- [agentic/SECURITY.md](agentic/SECURITY.md) \u2014 CEL policies, network policies, RBAC\n100\t\n101\t### Component deep-dives\n102\t\n103\t- [TrustManager controller](agentic/design-docs/components/trustmanager-controller.md)\n104\t- [IstioCSR controller](agentic/design-docs/components/istiocsr-controller.md)\n105\t- [OptionalInformer](agentic/design-docs/components/optional-informer.md)\n106\t\n107\t### Concepts\n108\t\n109\t- [Singleton pattern](agentic/domain/concepts/singleton-pattern.md)\n110\t",
+    "is_error": false,
+    "timestamp": "2026-07-20T16:53:03.053Z"
+  },
+  {
+    "type": "tool_result",
+    "tool_use_id": "toolu_vrtx_01DL3gaMP6BJt1FcGqpLQHe6",
+    "tool_name": "Bash",
+    "content": "/Users/kpais/kpais-workspace/a_b_evals/repos/cert-manager-operator-treatment",
+    "is_error": false,
+    "timestamp": "2026-07-20T16:53:04.960Z"
+  },
+  {
+    "type": "assistant",
+    "text": "",
+    "tools": [
+      {
+        "name": "Read",
+        "id": "toolu_vrtx_01XzeumZ13hKiK1kZQfvTQqN",
+        "input": {
+          "file_path": "/Users/kpais/kpais-workspace/a_b_evals/repos/cert-manager-operator-treatment/api/operator/v1alpha1/certmanager_types.go"
+        }
+      }
+    ],
+    "timestamp": "2026-07-20T16:53:10.807Z",
+    "_msg_id": "msg_vrtx_012TojaGijrHtwwTFfLqfV1e"
+  },
+  {
+    "type": "tool_result",
+    "tool_use_id": "toolu_vrtx_01XzeumZ13hKiK1kZQfvTQqN",
+    "tool_name": "Read",
+    "content": "1\tpackage v1alpha1\n2\t\n3\timport (\n4\t\tapiv1 \"github.com/openshift/api/operator/v1\"\n5\t\tcorev1 \"k8s.io/api/core/v1\"\n6\t\tnetworkingv1 \"k8s.io/api/networking/v1\"\n7\t\tmetav1 \"k8s.io/apimachinery/pkg/apis/meta/v1\"\n8\t)\n9\t\n10\t// CertManagerSpec defines the desired state of CertManager.\n11\ttype CertManagerSpec struct {\n12\t\tapiv1.OperatorSpec `json:\",inline\"`\n13\t\n14\t\t// ControllerConfig specifies further customization options for the controller's deployment spec.\n15\t\t//\n16\t\t// Possible customizations include the following,\n17\t\t//\n18\t\t// For OverrideArgs,\n19\t\t// This field appends values to .spec.template.spec.containers[...].args. The container\n20\t\t// that will be selected will be based on image present on the spec. Possible values are,\n21\t\t// Eg:\n22\t\t//   - \"--acme-http01-solver-nameservers=\"8.8.8.8:53,1.1.1.1:53\"\n23\t\t//   - \"--dns01-recursive-nameservers=8.8.8.8:53,1.1.1.1:53\"\n24\t\t//   - \"--dns01-recursive-nameservers-only\"\n25\t\t//\n26\t\t// For OverrideEnvs,\n27\t\t// This field appends values to .spec.template.spec.containers[...].env. The container\n28\t\t// that will be selected will be based on image present on the spec. Possible values are,\n29\t\t// Eg:\n30\t\t//   - \"HTTP_PROXY\": \"http://proxy:8080\"\n31\t\t//\n32\t\t// +kubebuilder:validation:Optional\n33\t\t// +optional\n34\t\tControllerConfig *DeploymentConfig `json:\"controllerConfig,omitempty\"`\n35\t\n36\t\t// WebhookConfig specifies further customization options for the webhook's deployment spec.\n37\t\t//\n38\t\t// Possible customizations include the following,\n39\t\t//\n40\t\t// For OverrideArgs,\n41\t\t// --config string                                Path to a file containing a WebhookConfiguration object used to configure the webhook\n42\t\t// --dynamic-serving-ca-secret-name string        name of the secret used to store the CA that signs serving certificates\n43\t\t// --dynamic-serving-ca-secret-namespace string   namespace of the secret used to store the CA that signs serving certificates\n44\t\t// --dynamic-serving-dns-names strings            DNS names that should be present on certificates generated by the dynamic serving CA\n45\t\t// --v Level                                      number for the log level verbosity\n46\t\t//\n47\t\t// +kubebuilder:validation:Optional\n48\t\t// +optional\n49\t\tWebhookConfig *DeploymentConfig `json:\"webhookConfig,omitempty\"`\n50\t\n51\t\t// CAInjectorConfig specifies further customization options for the cainjector's deployment spec.\n52\t\t//\n53\t\t// Possible customizations include the following,\n54\t\t//\n55\t\t// For OverrideArgs,\n56\t\t// --namespace string                          If set, this limits the scope of cainjector to a single namespace. If set, cainjector\n57\t\t//                                             will not update resources with certificates outside of the configured namespace.\n58\t\t// --v Level                                   number for the log level verbosity\n59\t\t//\n60\t\t// +kubebuilder:validation:Optional\n61\t\t// +optional\n62\t\tCAInjectorConfig *DeploymentConfig `json:\"cainjectorConfig,omitempty\"`\n63\t\n64\t\t// DefaultNetworkPolicy enables the default network policy for cert-manager components.\n65\t\t// When set to \"true\", the operator will create default network policies to secure\n66\t\t// communication between cert-manager controller, webhook, and cainjector components.\n67\t\t// When set to \"false\" or empty, no default network policies are created.\n68\t\t// Valid values are: \"true\", \"false\", or empty (default: false).\n69\t\t//\n70\t\t// This field is immutable once set to \"true\" for security reasons. Network policies\n71\t\t// cannot be disabled once enabled to prevent accidental security degradation.\n72\t\t// Users should carefully plan their network policy requirements before enabling this field.\n73\t\t//\n74\t\t// +kubebuilder:validation:Optional\n75\t\t// +kubebuilder:validation:Enum:=\"true\";\"false\";\"\"\n76\t\t// +kubebuilder:validation:XValidation:rule=\"oldSelf != 'true' || self == 'true'\",message=\"defaultNetworkPolicy cannot be changed from 'true' to 'false' once set\"\n77\t\t// +optional\n78\t\tDefaultNetworkPolicy string `json:\"defaultNetworkPolicy,omitempty\"`\n79\t\n80\t\t// NetworkPolicies specifies the egress network policy configuration to be applied to cert-manager\n81\t\t// pods/operands when DefaultNetworkPolicy is \"true\". By default, enabling network policies\n82\t\t// creates a deny-all policy that blocks all outgoing traffic from cert-manager components.\n83\t\t// Ingress rules are automatically handled by the operator based on the current running ports.\n84\t\t// Use this field to provide the necessary egress policy rules that allow required outbound traffic\n85\t\t// for cert-manager to function properly (e.g., API server communication, external issuer access, etc.).\n86\t\t//\n87\t\t// Each NetworkPolicy in this slice will be created as a separate Kubernetes NetworkPolicy\n88\t\t// resource. Multiple policies can be defined to organize egress rules logically (e.g., separate\n89\t\t// policies for different types of outbound traffic or different security zones).\n90\t\t//\n91\t\t// This field is only effective when DefaultNetworkPolicy is set to \"true\".\n92\t\t// If DefaultNetworkPolicy is \"true\" but this field is not provided, cert-manager\n93\t\t// components will be isolated with deny-all egress policies.\n94\t\t//\n95\t\t// This field is immutable once DefaultNetworkPolicy is set to \"true\" for security reasons.\n96\t\t//\n97\t\t// +kubebuilder:validation:Optional\n98\t\t// +kubebuilder:validation:XValidation:rule=\"oldSelf.all(op, self.exists(p, p.name == op.name && p.componentName == op.componentName))\",message=\"name and componentName fields in networkPolicies are immutable\"\n99\t\t// +kubebuilder:validation:MinItems:=0\n100\t\t// +kubebuilder:validation:MaxItems:=50\n101\t\t// +kubebuilder:validation:Optional\n102\t\t// +listType=map\n103\t\t// +listMapKey=name\n104\t\t// +listMapKey=componentName\n105\t\t// +optional\n106\t\tNetworkPolicies []NetworkPolicy `json:\"networkPolicies,omitempty\"`\n107\t}\n108\t\n109\t// DeploymentConfig defines the schema for\n110\t// overriding deployment of cert-manager operands,\n111\t// namely the controller, webhook and cainjector.\n112\ttype DeploymentConfig struct {\n113\t\n114\t\t// +kubebuilder:validation:Optional\n115\t\t// +optional\n116\t\tOverrideArgs []string `json:\"overrideArgs,omitempty\"`\n117\t\n118\t\t// +kubebuilder:validation:Optional\n119\t\t// +optional\n120\t\tOverrideEnv []corev1.EnvVar `json:\"overrideEnv,omitempty\"`\n121\t\n122\t\t// +kubebuilder:validation:Optional\n123\t\t// +optional\n124\t\tOverrideLabels map[string]string `json:\"overrideLabels,omitempty\"`\n125\t\n126\t\t// +kubebuilder:validation:Optional\n127\t\t// +optional\n128\t\tOverrideResources CertManagerResourceRequirements `json:\"overrideResources,omitempty\"`\n129\t\n130\t\t// OverrideReplicas defines the number of replicas for the operand deployment.\n131\t\t// If not specified, the default replicas from the deployment manifest will be used.\n132\t\t// +kubebuilder:validation:Optional\n133\t\t// +kubebuilder:validation:Minimum=1\n134\t\t// +optional\n135\t\tOverrideReplicas *int32 `json:\"overrideReplicas,omitempty\"`\n136\t\n137\t\t// +kubebuilder:validation:Optional\n138\t\t// +optional\n139\t\tOverrideScheduling CertManagerScheduling `json:\"overrideScheduling,omitempty\"`\n140\t}\n141\t\n142\t// CertManagerResourceRequirements describes the compute resource requirements for the cert-manager operands,\n143\t// namely the controller, webhook and cainjector.\n144\ttype CertManagerResourceRequirements struct {\n145\t\t// Limits describes the maximum amount of compute resources allowed.\n146\t\t// More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/\n147\t\t// +optional\n148\t\tLimits corev1.ResourceList `json:\"limits,omitempty\" protobuf:\"bytes,1,rep,name=limits,casttype=ResourceList,castkey=ResourceName\"`\n149\t\t// Requests describes the minimum amount of compute resources required.\n150\t\t// If Requests is omitted for a container, it defaults to Limits if that is explicitly specified,\n151\t\t// otherwise to an implementation-defined value.\n152\t\t// More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/\n153\t\t// +optional\n154\t\tRequests corev1.ResourceList `json:\"requests,omitempty\" protobuf:\"bytes,2,rep,name=requests,casttype=ResourceList,castkey=ResourceName\"`\n155\t}\n156\t\n157\t// CertManagerScheduling describes the scheduling configurations for the cert-manager operands,\n158\t// namely the controller, webhook and cainjector.\n159\ttype CertManagerScheduling struct {\n160\t\t// NodeSelector is a selector which must be true for the pod to fit on a node.\n161\t\t// Selector which must match a node's labels for the pod to be scheduled on that node.\n162\t\t// More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/\n163\t\t// +optional\n164\t\t// +mapType=atomic\n165\t\tNodeSelector map[string]string `json:\"nodeSelector,omitempty\" protobuf:\"bytes,7,rep,name=nodeSelector\"`\n166\t\n167\t\t// Tolerations are attached to the pod to tolerate any taint that matches the\n168\t\t// taint's key, value and effect using the toleration's matching operator.\n169\t\t// More info: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/\n170\t\t// +optional\n171\t\t// +listType=atomic\n172\t\tTolerations []corev1.Toleration `json:\"tolerations,omitempty\" protobuf:\"bytes,22,opt,name=tolerations\"`\n173\t}\n174\t\n175\t// CertManagerStatus defines the observed state of CertManager.\n176\ttype CertManagerStatus struct {\n177\t\tapiv1.OperatorStatus `json:\",inline\"`\n178\t}\n179\t\n180\t// +genclient\n181\t// +genclient:nonNamespaced\n182\t// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object\n183\t//+kubebuilder:object:root=true\n184\t//+kubebuilder:subresource:status\n185\t//+kubebuilder:resource:scope=Cluster\n186\t\n187\t// CertManager is the Schema for the certmanagers API\n188\t// +operator-sdk:csv:customresourcedefinitions:displayName=\"CertManager\"\n189\ttype CertManager struct {\n190\t\tmetav1.TypeMeta   `json:\",inline\"`\n191\t\tmetav1.ObjectMeta `json:\"metadata,omitempty\"`\n192\t\n193\t\t// +kubebuilder:validation:Required\n194\t\t// +required\n195\t\tSpec CertManagerSpec `json:\"spec,omitempty\"`\n196\t\t// +optional\n197\t\tStatus CertManagerStatus `json:\"status,omitempty\"`\n198\t}\n199\t\n200\ttype UnsupportedConfigOverrides struct {\n201\t\tController UnsupportedConfigOverridesForCertManagerController `json:\"controller,omitempty\"`\n202\t\tWebhook    UnsupportedConfigOverridesForCertManagerWebhook    `json:\"webhook,omitempty\"`\n203\t\tCAInjector UnsupportedConfigOverridesForCertManagerCAInjector `json:\"cainjector,omitempty\"`\n204\t}\n205\t\n206\ttype UnsupportedConfigOverridesForCertManagerController struct {\n207\t\tArgs []string `json:\"args,omitempty\"`\n208\t}\n209\t\n210\ttype UnsupportedConfigOverridesForCertManagerWebhook struct {\n211\t\tArgs []string `json:\"args,omitempty\"`\n212\t}\n213\t\n214\ttype UnsupportedConfigOverridesForCertManagerCAInjector struct {\n215\t\tArgs []string `json:\"args,omitempty\"`\n216\t}\n217\t\n218\t// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object\n219\t//+kubebuilder:object:root=true\n220\t\n221\t// CertManagerList contains a list of CertManager.\n222\ttype CertManagerList struct {\n223\t\tmetav1.TypeMeta `json:\",inline\"`\n224\t\tmetav1.ListMeta `json:\"metadata\"`\n225\t\n226\t\tItems []CertManager `json:\"items\"`\n227\t}\n228\t\n229\t// ComponentName represents the different cert-manager components that can have network policies applied.\n230\ttype ComponentName string\n231\t\n232\tconst (\n233\t\t// CAInjector represents the cert-manager CA injector component.\n234\t\tCAInjector ComponentName = \"CAInjector\"\n235\t\n236\t\t// CoreController represents the cert-manager core controller component.\n237\t\tCoreController ComponentName = \"CoreController\"\n238\t\n239\t\t// Webhook represents the cert-manager webhook component.\n240\t\tWebhook ComponentName = \"Webhook\"\n241\t)\n242\t\n243\t// NetworkPolicy represents a custom network policy configuration for operator-managed components.\n244\t// It includes a name for identification and the network policy rules to be enforced.\n245\ttype NetworkPolicy struct {\n246\t\t// Name is a unique identifier for this network policy configuration.\n247\t\t// This name will be used as part of the generated NetworkPolicy resource name.\n248\t\t// +kubebuilder:validation:MinLength:=1\n249\t\t// +kubebuilder:validation:MaxLength:=253\n250\t\t// +kubebuilder:validation:Required\n251\t\t// +required\n252\t\tName string `json:\"name\"`\n253\t\n254\t\t// ComponentName represents the different cert-manager components that can have network policies applied.\n255\t\t// +kubebuilder:validation:Enum=CoreController\n256\t\t// +kubebuilder:validation:Required\n257\t\t// +required\n258\t\tComponentName ComponentName `json:\"componentName\"`\n259\t\n260\t\t// egress is a list of egress rules to be applied to the selected pods. Outgoing traffic\n261\t\t// is allowed if there are no NetworkPolicies selecting the pod (and cluster policy\n262\t\t// otherwise allows the traffic), OR if the traffic matches at least one egress rule\n263\t\t// across all of the NetworkPolicy objects whose podSelector matches the pod. If\n264\t\t// this field is empty then this NetworkPolicy limits all outgoing traffic (and serves\n265\t\t// solely to ensure that the pods it selects are isolated by default).\n266\t\t// The operator will automatically handle ingress rules based on the current running ports.\n267\t\t// +optional\n268\t\t// +listType=atomic\n269\t\tEgress []networkingv1.NetworkPolicyEgressRule `json:\"egress,omitempty\" protobuf:\"bytes,3,rep,name=egress\"`\n270\t}\n271\t\n272\tfunc init() {\n273\t\tSchemeBuilder.Register(&CertManager{}, &CertManagerList{})\n274\t}\n275\t",
+    "is_error": false,
+    "timestamp": "2026-07-20T16:53:10.816Z"
+  },
+  {
+    "type": "assistant",
+    "text": "",
+    "tools": [
+      {
+        "name": "Bash",
+        "id": "toolu_vrtx_016QWmeP3Cw3GzR4cg4oSJFg",
+        "input": {
+          "command": "grep -n 'XValidation\\|x-kubernetes-validations\\|kubebuilder:validation:XValidation' api/operator/v1alpha1/trustmanager_types.go | head -20",
+          "description": "Find CEL validation markers in TrustManager types"
+        }
+      }
+    ],
+    "timestamp": "2026-07-20T16:53:12.086Z",
+    "_msg_id": "msg_vrtx_012TojaGijrHtwwTFfLqfV1e"
+  },
+  {
+    "type": "tool_result",
+    "tool_use_id": "toolu_vrtx_016QWmeP3Cw3GzR4cg4oSJFg",
+    "tool_name": "Bash",
+    "content": "39:// +kubebuilder:validation:XValidation:rule=\"self.metadata.name == 'cluster'\",message=\"TrustManager is a singleton, .metadata.name must be 'cluster'\"\n101:\t// +kubebuilder:validation:XValidation:rule=\"oldSelf == '' || self == oldSelf\",message=\"trustNamespace is immutable once set\"\n161:// +kubebuilder:validation:XValidation:rule=\"self.policy != 'Custom' || (has(self.authorizedSecrets) && size(self.authorizedSecrets) > 0)\",message=\"authorizedSecrets must not be empty when policy is Custom\"\n162:// +kubebuilder:validation:XValidation:rule=\"self.policy == 'Custom' || !has(self.authorizedSecrets) || size(self.authorizedSecrets) == 0\",message=\"authorizedSecrets must be empty when policy is not Custom\"",
+    "is_error": false,
+    "timestamp": "2026-07-20T16:53:12.879Z"
+  },
+  {
+    "type": "system",
+    "subtype": "thinking_tokens",
+    "timestamp": "2026-07-20T16:53:17.185Z"
+  },
+  {
+    "type": "system",
+    "subtype": "thinking_tokens",
+    "timestamp": "2026-07-20T16:53:17.544Z"
+  },
+  {
+    "type": "system",
+    "subtype": "thinking_tokens",
+    "timestamp": "2026-07-20T16:53:17.544Z"
+  },
+  {
+    "type": "system",
+    "subtype": "thinking_tokens",
+    "timestamp": "2026-07-20T16:53:17.544Z"
+  },
+  {
+    "type": "system",
+    "subtype": "thinking_tokens",
+    "timestamp": "2026-07-20T16:53:17.544Z"
+  },
+  {
+    "type": "system",
+    "subtype": "thinking_tokens",
+    "timestamp": "2026-07-20T16:53:17.544Z"
+  },
+  {
+    "type": "system",
+    "subtype": "thinking_tokens",
+    "timestamp": "2026-07-20T16:53:17.544Z"
+  },
+  {
+    "type": "system",
+    "subtype": "thinking_tokens",
+    "timestamp": "2026-07-20T16:53:17.544Z"
+  },
+  {
+    "type": "system",
+    "subtype": "thinking_tokens",
+    "timestamp": "2026-07-20T16:53:17.544Z"
+  },
+  {
+    "type": "system",
+    "subtype": "thinking_tokens",
+    "timestamp": "2026-07-20T16:53:18.103Z"
+  },
+  {
+    "type": "system",
+    "subtype": "thinking_tokens",
+    "timestamp": "2026-07-20T16:53:18.103Z"
+  },
+  {
+    "type": "system",
+    "subtype": "thinking_tokens",
+    "timestamp": "2026-07-20T16:53:18.103Z"
+  },
+  {
+    "type": "system",
+    "subtype": "thinking_tokens",
+    "timestamp": "2026-07-20T16:53:18.103Z"
+  },
+  {
+    "type": "system",
+    "subtype": "thinking_tokens",
+    "timestamp": "2026-07-20T16:53:18.103Z"
+  },
+  {
+    "type": "system",
+    "subtype": "thinking_tokens",
+    "timestamp": "2026-07-20T16:53:18.103Z"
+  },
+  {
+    "type": "system",
+    "subtype": "thinking_tokens",
+    "timestamp": "2026-07-20T16:53:18.103Z"
+  },
+  {
+    "type": "system",
+    "subtype": "thinking_tokens",
+    "timestamp": "2026-07-20T16:53:18.104Z"
+  },
+  {
+    "type": "system",
+    "subtype": "thinking_tokens",
+    "timestamp": "2026-07-20T16:53:18.471Z"
+  },
+  {
+    "type": "system",
+    "subtype": "thinking_tokens",
+    "timestamp": "2026-07-20T16:53:18.474Z"
+  },
+  {
+    "type": "system",
+    "subtype": "thinking_tokens",
+    "timestamp": "2026-07-20T16:53:18.478Z"
+  },
+  {
+    "type": "system",
+    "subtype": "thinking_tokens",
+    "timestamp": "2026-07-20T16:53:18.480Z"
+  },
+  {
+    "type": "system",
+    "subtype": "thinking_tokens",
+    "timestamp": "2026-07-20T16:53:18.481Z"
+  },
+  {
+    "type": "system",
+    "subtype": "thinking_tokens",
+    "timestamp": "2026-07-20T16:53:18.482Z"
+  },
+  {
+    "type": "system",
+    "subtype": "thinking_tokens",
+    "timestamp": "2026-07-20T16:53:18.483Z"
+  },
+  {
+    "type": "system",
+    "subtype": "thinking_tokens",
+    "timestamp": "2026-07-20T16:53:18.484Z"
+  },
+  {
+    "type": "system",
+    "subtype": "thinking_tokens",
+    "timestamp": "2026-07-20T16:53:18.896Z"
+  },
+  {
+    "type": "system",
+    "subtype": "thinking_tokens",
+    "timestamp": "2026-07-20T16:53:18.896Z"
+  },
+  {
+    "type": "system",
+    "subtype": "thinking_tokens",
+    "timestamp": "2026-07-20T16:53:18.900Z"
+  },
+  {
+    "type": "system",
+    "subtype": "thinking_tokens",
+    "timestamp": "2026-07-20T16:53:18.902Z"
+  },
+  {
+    "type": "system",
+    "subtype": "thinking_tokens",
+    "timestamp": "2026-07-20T16:53:18.904Z"
+  },
+  {
+    "type": "system",
+    "subtype": "thinking_tokens",
+    "timestamp": "2026-07-20T16:53:18.904Z"
+  },
+  {
+    "type": "system",
+    "subtype": "thinking_tokens",
+    "timestamp": "2026-07-20T16:53:18.906Z"
+  },
+  {
+    "type": "system",
+    "subtype": "thinking_tokens",
+    "timestamp": "2026-07-20T16:53:18.906Z"
+  },
+  {
+    "type": "system",
+    "subtype": "thinking_tokens",
+    "timestamp": "2026-07-20T16:53:21.525Z"
+  },
+  {
+    "type": "system",
+    "subtype": "thinking_tokens",
+    "timestamp": "2026-07-20T16:53:21.609Z"
+  },
+  {
+    "type": "system",
+    "subtype": "thinking_tokens",
+    "timestamp": "2026-07-20T16:53:21.661Z"
+  },
+  {
+    "type": "system",
+    "subtype": "thinking_tokens",
+    "timestamp": "2026-07-20T16:53:21.696Z"
+  },
+  {
+    "type": "system",
+    "subtype": "thinking_tokens",
+    "timestamp": "2026-07-20T16:53:21.707Z"
+  },
+  {
+    "type": "system",
+    "subtype": "thinking_tokens",
+    "timestamp": "2026-07-20T16:53:21.735Z"
+  },
+  {
+    "type": "system",
+    "subtype": "thinking_tokens",
+    "timestamp": "2026-07-20T16:53:21.750Z"
+  },
+  {
+    "type": "system",
+    "subtype": "thinking_tokens",
+    "timestamp": "2026-07-20T16:53:21.789Z"
+  },
+  {
+    "type": "system",
+    "subtype": "thinking_tokens",
+    "timestamp": "2026-07-20T16:53:21.847Z"
+  },
+  {
+    "type": "system",
+    "subtype": "thinking_tokens",
+    "timestamp": "2026-07-20T16:53:21.918Z"
+  },
+  {
+    "type": "system",
+    "subtype": "thinking_tokens",
+    "timestamp": "2026-07-20T16:53:22.021Z"
+  },
+  {
+    "type": "system",
+    "subtype": "thinking_tokens",
+    "timestamp": "2026-07-20T16:53:22.053Z"
+  },
+  {
+    "type": "system",
+    "subtype": "thinking_tokens",
+    "timestamp": "2026-07-20T16:53:22.072Z"
+  },
+  {
+    "type": "system",
+    "subtype": "thinking_tokens",
+    "timestamp": "2026-07-20T16:53:22.098Z"
+  },
+  {
+    "type": "system",
+    "subtype": "thinking_tokens",
+    "timestamp": "2026-07-20T16:53:22.116Z"
+  },
+  {
+    "type": "system",
+    "subtype": "thinking_tokens",
+    "timestamp": "2026-07-20T16:53:22.190Z"
+  },
+  {
+    "type": "assistant",
+    "text": "",
+    "tools": [],
+    "timestamp": "2026-07-20T16:53:22.231Z",
+    "_msg_id": "msg_vrtx_01Dy6MTgmeCySDjU2RprpsTJ"
+  },
+  {
+    "type": "assistant",
+    "text": "Let me see the exact placement of the marker on TrustManager.",
+    "tools": [],
+    "timestamp": "2026-07-20T16:53:22.385Z",
+    "_msg_id": "msg_vrtx_01Dy6MTgmeCySDjU2RprpsTJ"
+  },
+  {
+    "type": "assistant",
+    "text": "",
+    "tools": [
+      {
+        "name": "Read",
+        "id": "toolu_vrtx_01PwAq2wkqEEto2wCZfkScpf",
+        "input": {
+          "file_path": "/Users/kpais/kpais-workspace/a_b_evals/repos/cert-manager-operator-treatment/api/operator/v1alpha1/trustmanager_types.go",
+          "offset": 30,
+          "limit": 20
+        }
+      }
+    ],
+    "timestamp": "2026-07-20T16:53:22.800Z",
+    "_msg_id": "msg_vrtx_01Dy6MTgmeCySDjU2RprpsTJ"
+  },
+  {
+    "type": "tool_result",
+    "tool_use_id": "toolu_vrtx_01PwAq2wkqEEto2wCZfkScpf",
+    "tool_name": "Read",
+    "content": "30\t// +genclient:nonNamespaced\n31\t// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object\n32\t// +kubebuilder:object:root=true\n33\t// +kubebuilder:subresource:status\n34\t// +kubebuilder:resource:path=trustmanagers,scope=Cluster,categories={cert-manager-operator, trust-manager},shortName=trustmanager;tm\n35\t// +kubebuilder:printcolumn:name=\"Ready\",type=\"string\",JSONPath=\".status.conditions[?(@.type=='Ready')].status\"\n36\t// +kubebuilder:printcolumn:name=\"Message\",type=\"string\",JSONPath=\".status.conditions[?(@.type=='Ready')].message\"\n37\t// +kubebuilder:printcolumn:name=\"AGE\",type=\"date\",JSONPath=\".metadata.creationTimestamp\"\n38\t// +kubebuilder:metadata:labels={\"app.kubernetes.io/name=trustmanager\", \"app.kubernetes.io/part-of=cert-manager-operator\"}\n39\t// +kubebuilder:validation:XValidation:rule=\"self.metadata.name == 'cluster'\",message=\"TrustManager is a singleton, .metadata.name must be 'cluster'\"\n40\t// +operator-sdk:csv:customresourcedefinitions:displayName=\"TrustManager\"\n41\ttype TrustManager struct {\n42\t\tmetav1.TypeMeta `json:\",inline\"`\n43\t\n44\t\t// metadata is the standard object's metadata.\n45\t\t// More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata\n46\t\t// +required\n47\t\tmetav1.ObjectMeta `json:\"metadata,omitempty\"`\n48\t\n49\t\t// spec is the specification of the desired behavior of the TrustManager.",
+    "is_error": false,
+    "timestamp": "2026-07-20T16:53:22.808Z"
+  },
+  {
+    "type": "assistant",
+    "text": "Now I have the exact pattern. I need to add the same kind of CEL validation marker to the `CertManager` type. Let me also check the current CRD manifest to understand what gets regenerated.",
+    "tools": [],
+    "timestamp": "2026-07-20T16:53:28.658Z",
+    "_msg_id": "msg_vrtx_01SMFX5bwVqDgbfM8Toqu42z"
+  },
+  {
+    "type": "assistant",
+    "text": "",
+    "tools": [
+      {
+        "name": "Bash",
+        "id": "toolu_vrtx_01GEcZ75K81MrkUgM3uoQMpE",
+        "input": {
+          "command": "ls bundle/manifests/cert-manager*.yaml 2>/dev/null || echo \"no bundle manifests found\"; ls config/crd/bases/operator.openshift.io_certmanagers.yaml 2>/dev/null || echo \"no CRD base found\"",
+          "description": "Check for existing CRD and bundle manifests"
+        }
+      }
+    ],
+    "timestamp": "2026-07-20T16:53:30.289Z",
+    "_msg_id": "msg_vrtx_01SMFX5bwVqDgbfM8Toqu42z"
+  },
+  {
+    "type": "tool_result",
+    "tool_use_id": "toolu_vrtx_01GEcZ75K81MrkUgM3uoQMpE",
+    "tool_name": "Bash",
+    "content": "bundle/manifests/cert-manager-acme-issuer-sample_console.openshift.io_v1_consoleyamlsample.yaml\nbundle/manifests/cert-manager-certificate-sample_console.openshift.io_v1_consoleyamlsample.yaml\nbundle/manifests/cert-manager-example_console.openshift.io_v1_consolequickstart.yaml\nbundle/manifests/cert-manager-issuer-sample_console.openshift.io_v1_consoleyamlsample.yaml\nbundle/manifests/cert-manager-operator-controller-manager-metrics-service_v1_service.yaml\nbundle/manifests/cert-manager-operator-metrics-reader_rbac.authorization.k8s.io_v1_clusterrole.yaml\nbundle/manifests/cert-manager-operator-trusted-ca-bundle_v1_configmap.yaml\nbundle/manifests/cert-manager-operator.clusterserviceversion.yaml\nbundle/manifests/cert-manager.io_certificaterequests.yaml\nbundle/manifests/cert-manager.io_certificates.yaml\nbundle/manifests/cert-manager.io_clusterissuers.yaml\nbundle/manifests/cert-manager.io_issuers.yaml\nconfig/crd/bases/operator.openshift.io_certmanagers.yaml",
+    "is_error": false,
+    "timestamp": "2026-07-20T16:53:31.069Z"
+  },
+  {
+    "type": "assistant",
+    "text": "",
+    "tools": [
+      {
+        "name": "Bash",
+        "id": "toolu_vrtx_012yyHvsNdKRsQUPDopb8sSS",
+        "input": {
+          "command": "ls bundle/manifests/operator.openshift.io_certmanagers.yaml 2>/dev/null; ls bundle/manifests/operator.openshift.io_*.yaml 2>/dev/null",
+          "description": "Find the CRD bundle manifest for certmanagers"
+        }
+      }
+    ],
+    "timestamp": "2026-07-20T16:53:35.580Z",
+    "_msg_id": "msg_vrtx_01AqCgGwSJDGPaDHhShobW6n"
+  },
+  {
+    "type": "tool_result",
+    "tool_use_id": "toolu_vrtx_012yyHvsNdKRsQUPDopb8sSS",
+    "tool_name": "Bash",
+    "content": "bundle/manifests/operator.openshift.io_certmanagers.yaml\nbundle/manifests/operator.openshift.io_certmanagers.yaml\nbundle/manifests/operator.openshift.io_istiocsrs.yaml\nbundle/manifests/operator.openshift.io_trustmanagers.yaml",
+    "is_error": false,
+    "timestamp": "2026-07-20T16:53:36.324Z"
+  },
+  {
+    "type": "assistant",
+    "text": "I have everything I need. Here's the complete implementation:\n\n## File to modify\n\n**`api/operator/v1alpha1/certmanager_types.go`** \u2014 Add the CEL validation marker before the `CertManager` struct declaration.",
+    "tools": [],
+    "timestamp": "2026-07-20T16:53:40.733Z",
+    "_msg_id": "msg_vrtx_01PvGRA8KfxuVRCr5nELfshQ"
+  },
+  {
+    "type": "assistant",
+    "text": "",
+    "tools": [
+      {
+        "name": "Edit",
+        "id": "toolu_vrtx_01Ww6LDRqEpCr1Uu9koaj22R",
+        "input": {
+          "replace_all": false,
+          "file_path": "/Users/kpais/kpais-workspace/a_b_evals/repos/cert-manager-operator-treatment/api/operator/v1alpha1/certmanager_types.go",
+          "old_string": "// +genclient\n// +genclient:nonNamespaced\n// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object\n//+kubebuilder:object:root=true\n//+kubebuilder:subresource:status\n//+kubebuilder:resource:scope=Cluster\n\n// CertManager is the Schema for the certmanagers API\n// +operator-sdk:csv:customresourcedefinitions:displayName=\"CertManager\"\ntype CertManager struct {",
+          "new_string": "// +genclient\n// +genclient:nonNamespaced\n// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object\n//+kubebuilder:object:root=true\n//+kubebuilder:subresource:status\n//+kubebuilder:resource:scope=Cluster\n\n// CertManager is the Schema for the certmanagers API\n// +kubebuilder:validation:XValidation:rule=\"self.metadata.name == 'cluster'\",message=\"CertManager is a singleton, .metadata.name must be 'cluster'\"\n// +operator-sdk:csv:customresourcedefinitions:displayName=\"CertManager\"\ntype CertManager struct {"
+        }
+      }
+    ],
+    "timestamp": "2026-07-20T16:53:45.200Z",
+    "_msg_id": "msg_vrtx_01PvGRA8KfxuVRCr5nELfshQ"
+  },
+  {
+    "type": "tool_result",
+    "tool_use_id": "toolu_vrtx_01Ww6LDRqEpCr1Uu9koaj22R",
+    "tool_name": "Edit",
+    "content": "Claude requested permissions to write to /Users/kpais/kpais-workspace/a_b_evals/repos/cert-manager-operator-treatment/api/operator/v1alpha1/certmanager_types.go, but you haven't granted it yet.",
+    "is_error": true,
+    "timestamp": "2026-07-20T16:53:45.205Z"
+  },
+  {
+    "type": "assistant",
+    "text": "The edit was blocked by the harness. As instructed, I'll provide the complete implementation as text output instead.\n\n---\n\n## Implementation\n\n### 1. Modify `api/operator/v1alpha1/certmanager_types.go`\n\nAdd one line \u2014 the CEL `XValidation` marker \u2014 just before the `type CertManager struct` declaration. Insert it between the existing comment block and the `+operator-sdk` marker, matching the TrustManager pattern from `trustmanager_types.go:39`:\n\n```diff\n // +genclient\n // +genclient:nonNamespaced\n // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object\n //+kubebuilder:object:root=true\n //+kubebuilder:subresource:status\n //+kubebuilder:resource:scope=Cluster\n \n // CertManager is the Schema for the certmanagers API\n+// +kubebuilder:validation:XValidation:rule=\"self.metadata.name == 'cluster'\",message=\"CertManager is a singleton, .metadata.name must be 'cluster'\"\n // +operator-sdk:csv:customresourcedefinitions:displayName=\"CertManager\"\n type CertManager struct {\n```\n\nThe new line is at what will become line 189 (between the current lines 188 and 189). The full marker is:\n\n```go\n// +kubebuilder:validation:XValidation:rule=\"self.metadata.name == 'cluster'\",message=\"CertManager is a singleton, .metadata.name must be 'cluster'\"\n```\n\n### 2. Run `make manifests` to regenerate CRDs\n\n```bash\nmake manifests\n```\n\nThis regenerates:\n- `config/crd/bases/operator.openshift.io_certmanagers.yaml` \u2014 the base CRD will gain an `x-kubernetes-validations` block at the top-level schema:\n\n```yaml\nx-kubernetes-validations:\n- message: CertManager is a singleton, .metadata.name must be 'cluster'\n  rule: self.metadata.name == 'cluster'\n```\n\n- `bundle/manifests/operator.openshift.io_certmanagers.yaml` \u2014 the bundle copy of the CRD gets the same validation block.\n\n### 3. Files affected\n\n| File | Change |\n|---|---|\n| `api/operator/v1alpha1/certmanager_types.go` | Add one `+kubebuilder:validation:XValidation` marker comment (line 189) |\n| `config/crd/bases/operator.openshift.io_certmanagers.yaml` | Regenerated by `make manifests` \u2014 gains `x-kubernetes-validations` |\n| `bundle/manifests/operator.openshift.io_certmanagers.yaml` | Regenerated by `make manifests` \u2014 gains `x-kubernetes-validations` |\n\n### 4. How it works\n\nThe CEL rule `self.metadata.name == 'cluster'` runs at admission time on the entire `CertManager` object (`self` refers to the top-level resource when the marker is on the struct type). Any `CertManager` CR whose `metadata.name` is not exactly `\"cluster\"` will be rejected with the message: *\"CertManager is a singleton, .metadata.name must be 'cluster'\"*. This matches the identical singleton enforcement already in place for `TrustManager` at `trustmanager_types.go:39`.",
+    "tools": [],
+    "timestamp": "2026-07-20T16:54:00.688Z",
+    "_msg_id": "msg_vrtx_01USEAJW2JnhHhKQiJMPY3BA"
+  },
+  {
+    "type": "result",
+    "cost_usd": 0.31623125,
+    "num_turns": 9,
+    "timestamp": null
+  }
+]

@@ -1,0 +1,24 @@
+{
+  "exit_code": 0,
+  "duration_s": 264.7,
+  "token_usage": {
+    "input": 21624,
+    "output": 12471,
+    "cache_read": 744568,
+    "cache_create": 84656
+  },
+  "cost_usd": 1.321279,
+  "num_turns": 10,
+  "per_model_usage": {
+    "claude-opus-4-6": {
+      "input": 21624,
+      "output": 12471,
+      "cache_read": 744568,
+      "cache_create": 84656,
+      "cost_usd": 1.321279
+    }
+  },
+  "per_model_turns": {
+    "claude-opus-4-6": 10
+  }
+}

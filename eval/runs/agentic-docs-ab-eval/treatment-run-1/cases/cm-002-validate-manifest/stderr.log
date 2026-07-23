@@ -1,0 +1,3 @@
+Ignoring 1 permissions.additionalDirectories entry from .claude/settings.json: this workspace has not been trusted. Run Claude Code interactively here once and accept the trust dialog, or set projects["/private/var/folders/92/y2pgnx8x51n5hq5tg1zb5vvc0000gn/T/agent-eval/treatment-run-1/cases/cm-002-validate-manifest"].hasTrustDialogAccepted: true in /Users/kpais/.claude.json.
+
+WARNING: 3 permission denial(s) detected during execution

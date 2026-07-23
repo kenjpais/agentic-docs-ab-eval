@@ -1,0 +1,64 @@
+{
+  "exit_code": 0,
+  "duration_s": 69.9,
+  "wall_clock_s": 69.9,
+  "cost_usd": 0.42,
+  "token_usage": {
+    "input": 9,
+    "output": 2291,
+    "cache_read": 200596,
+    "cache_create": 42686
+  },
+  "num_turns": 7,
+  "per_model_usage": {
+    "claude-opus-4-6": {
+      "input": 9,
+      "output": 2291,
+      "cache_read": 200596,
+      "cache_create": 42686,
+      "cost_usd": 0.4244055
+    }
+  },
+  "per_model_turns": {
+    "claude-opus-4-6": 7
+  },
+  "num_cases": 1,
+  "model": "claude-opus-4-6",
+  "agent": "claude-code",
+  "agent_version": "2.1.210 (Claude Code)",
+  "execution_mode": "case",
+  "eval_params": {
+    "execution_mode": "case",
+    "max_budget_usd": 3.0,
+    "timeout_s": 1800,
+    "skill_args": "{{ input.task }}",
+    "effort": "high",
+    "mlflow_experiment": "agentic-docs-ab-eval"
+  },
+  "per_case": {
+    "cm-001-certmanager-cel": {
+      "exit_code": 0,
+      "duration_s": 69.9,
+      "token_usage": {
+        "input": 9,
+        "output": 2291,
+        "cache_read": 200596,
+        "cache_create": 42686
+      },
+      "cost_usd": 0.4244055,
+      "num_turns": 7,
+      "per_model_usage": {
+        "claude-opus-4-6": {
+          "input": 9,
+          "output": 2291,
+          "cache_read": 200596,
+          "cache_create": 42686,
+          "cost_usd": 0.4244055
+        }
+      },
+      "per_model_turns": {
+        "claude-opus-4-6": 7
+      }
+    }
+  }
+}
