@@ -76,7 +76,7 @@ that directionally supports the hypothesis.
    agentic/ directory entirely (treatment-v1, 0% doc consultation).
 
 2. **Guided discovery partially helps.** Telling the agent to read AGENTS.md (v2) raised
-   consultation to 45.5% and improved pairwise preference, but did not lift absolute scores.
+   consultation to 45.5%, but did not lift absolute scores.
 
 3. **High-complexity tasks are the best candidate.** The +0.200 delta on high-complexity
    tasks is the only positive signal aligning with the hypothesis. These are tasks where

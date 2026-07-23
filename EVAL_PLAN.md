@@ -2,7 +2,7 @@
 
 ## Context
 
-This plan responds to the design brief in `PLAN.md`. The goal is a rigorous A/B evaluation measuring whether agentic documentation (architecture guides, coding standards, runbooks, etc.) improves AI coding agent performance beyond the baseline `CLAUDE.md` alone. The evaluation must be reproducible, statistically sound, and operable against two Kubernetes operator repositories:
+This document describes the A/B evaluation measuring whether agentic documentation (architecture guides, coding standards, runbooks, etc.) improves AI coding agent performance beyond the baseline `CLAUDE.md` alone. The evaluation must be reproducible, statistically sound, and operable against two Kubernetes operator repositories:
 
 - `cert-manager-operator`: [https://github.com/openshift/cert-manager-operator](https://github.com/openshift/cert-manager-operator)
 - `multiarch-tuning-operator`: [https://github.com/outrigger-project/multiarch-tuning-operator](https://github.com/outrigger-project/multiarch-tuning-operator)
@@ -44,8 +44,6 @@ a_b_evals/
 │   │   ├── code-correctness.md
 │   │   ├── convention-adherence.md
 │   │   └── hallucination-check.md
-│   └── prompts/
-│       └── pairwise-comparison.md
 ├── repos/
 │   ├── multiarch-tuning-operator-baseline/   # Fresh clone, no agentic/
 │   ├── multiarch-tuning-operator-treatment/  # Fresh clone + generated agentic/
@@ -269,11 +267,7 @@ Tracks which documentation files the agent read during execution. Used to comput
 ### Judge 6: `hallucination_check` (LLM)
 
 **File:** `eval/judges/hallucination-check.md`
-Detects: invented package names, non-existent methods, incorrect API signatures, wrong file paths. Score: 0 (hallucinations present) or 1 (grounded in actual codebase).
-
-### Judge 7: `pairwise` (builtin comparison)
-
-Triggered via `--baseline <run-id>` when running the treatment condition. Compares baseline and treatment outputs per case across four dimensions: Completeness, Quality, Accuracy, Relevance. Returns `preferred: A | B | tie`.
+Detects: invented package names, non-existent methods, incorrect API signatures, wrong file paths. Score: 1–5 (1 = many hallucinations, 5 = fully grounded in actual codebase).
 
 ### Thresholds
 
@@ -287,8 +281,6 @@ thresholds:
     min_mean: 3.0
   hallucination_check:
     min_pass_rate: 0.85
-  pairwise:
-    min_win_rate: 0.55    # Treatment must win 55%+ of pairwise comparisons
 ```
 
 ---
@@ -317,8 +309,8 @@ for i in 1 2 3 4 5; do
   /eval-run --config eval-baseline.yaml --run-id baseline-run-$i
 done
 
-# 5. Run treatment, using first baseline run as pairwise reference
-/eval-run --config eval-treatment.yaml --run-id treatment-run-1 --baseline baseline-run-1
+# 5. Run treatment condition
+/eval-run --config eval-treatment.yaml --run-id treatment-run-1
 
 # 6. Sync all results to MLflow
 /eval-mlflow --experiment agentic-docs-ab-eval
@@ -369,21 +361,14 @@ H₁: Treatment condition shows statistically significant improvement (α = 0.05
 
 ### Test Selection
 
-- **Wilcoxon signed-rank test** (paired, non-parametric): appropriate for ordinal 1–5 scores, does not assume normality. Apply per-task (paired across condition).
-- **Mann-Whitney U test**: for cross-condition unpaired comparison on efficiency metrics.
-- **Cohen's d**: effect size for practical significance.
-- **Bootstrap 95% CI** (1000 iterations): confidence intervals on mean scores.
-
-
+Paired mean comparison by case_id: average each case's score across runs, then compare baseline vs treatment means directly. Pairing by case controls for task difficulty without requiring a significance test.
 
 ### Per-Metric Reporting
 
-For each metric (task_success, code_correctness, convention_adherence, hallucination_rate, num_turns, cost_usd):
+For each metric (task_success, code_correctness, convention_adherence, hallucination_check):
 
 - Mean ± SD per condition
-- Wilcoxon p-value
-- Cohen's d
-- 95% bootstrap CI on mean difference
+- Delta (treatment mean − baseline mean)
 
 
 

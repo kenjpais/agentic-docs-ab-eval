@@ -87,9 +87,7 @@ evaluation:
 
 artifacts:
   metrics_csv: metrics.csv          # 165 rows: run × case × condition × scores
-  analysis_notebook: analysis.ipynb  # MLflow-backed; requires populated mlruns/
-  phase7_results_v1: eval/runs/agentic-docs-ab-eval/phase7_results.json
-  phase7_results_v2: eval/runs/agentic-docs-ab-eval/phase7_v2_results.json
+  phase7_results: eval/runs/agentic-docs-ab-eval/phase7_results.json
   run_summaries: eval/runs/agentic-docs-ab-eval/*/summary.yaml
 
 reproduce:
@@ -112,7 +110,7 @@ caveats:
   - Tasks are synthetic coding prompts, not real PRs or issues.
   - Agentic docs were generated (not human-authored); quality scores are self-assessed.
   - efficiency judge uses per-run totals (all 11 cases combined), not per-case.
-    All runs failed efficiency threshold; this judge contributed 0 to OES for all conditions.
+    All runs failed efficiency threshold; this judge contributed 0 signal for all conditions.
   - treatment-v1 consulted_docs pass_rate=0.0 (agent read no expected docs without explicit instruction)
   - Statistical power: n=11 tasks × 5 runs = 55 pairs; designed for 80% power at d=0.5 but
     actual effect sizes were d<0.20 (negligible).
