@@ -2,8 +2,6 @@
 
 Does adding generated agentic documentation (AGENTS.md + `agentic/` tree) improve AI coding agent performance on Kubernetes operator tasks?
 
-**Result: No clear improvement detected across 165 invocations (11 tasks × 5 runs × 3 conditions).**
-
 ## Conditions
 
 | Condition | Description |
