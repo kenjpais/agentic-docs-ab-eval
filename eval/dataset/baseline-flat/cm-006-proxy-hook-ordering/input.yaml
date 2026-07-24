@@ -1,0 +1,14 @@
+repo_path: /Users/kpais/kpais-workspace/a_b_evals/repos/cert-manager-operator-baseline
+task: |
+  In pkg/controller/certmanager/generic_deployment_controller.go, the hooks slice in
+  newGenericDeploymentController has a hook ordering bug: withContainerEnvOverrideHook
+  runs before withProxyEnv, which means proxy environment variables overwrite any
+  user-specified container env overrides that conflict.
+
+  Fix the ordering so that withProxyEnv runs before withContainerEnvOverrideHook,
+  allowing user overrides to take precedence over proxy-injected values. This is a
+  one-line swap within the hooks slice literal.
+task_id: cm-006-proxy-hook-ordering
+repo: cert-manager-operator
+category: bug-fix
+complexity: low

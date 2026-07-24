@@ -1,0 +1,21 @@
+repo_path: /Users/kpais/kpais-workspace/a_b_evals/repos/multiarch-tuning-operator-treatment
+task: |
+  In pkg/image/inspector.go, the parseImageReference function uses strings.Split to
+  parse image references, but this breaks for images from registries with explicit port
+  numbers. For example, "myregistry.example.com:5000/myimage:latest@sha256:abc" fails
+  because splitting on ":" produces 3 elements (the port, the tag, and nothing after
+  the sha256) which hits the default error case.
+
+  Rewrite parseImageReference to correctly handle registries with ports by:
+  1. Using strings.Index(imageName, "@sha") instead of strings.Split on "@sha256:"
+     (also handles sha384, sha512 digests).
+  2. Using strings.LastIndex on "/" and ":" within the name part to distinguish a
+     registry port colon (before the last slash) from a tag colon (after the last slash).
+
+  A colon that appears after the last slash is a tag separator and should be stripped
+  along with the tag. A colon that appears before the last slash is part of a registry
+  host:port and must be preserved.
+task_id: mto-008-image-port-parsing
+repo: multiarch-tuning-operator
+category: bug-fix
+complexity: medium

@@ -1,0 +1,12 @@
+repo: multiarch-tuning-operator
+category: bug-fix
+complexity: medium
+expected_files:
+  - AGENTS.md
+  - agentic/DEVELOPMENT.md
+notes: >
+  Key insight: strings.LastIndex(namePart, ":") > strings.LastIndex(namePart, "/")
+  means the colon is after the last slash, i.e. it's a tag colon. If lastColon <=
+  lastSlash the colon is part of a registry:port and must not be stripped. DEVELOPMENT.md
+  documents the image reference parsing conventions.
+reference: reference.md

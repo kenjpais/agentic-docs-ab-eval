@@ -49,11 +49,21 @@ mlflow:
     category: "{{ input.category }}"
     complexity: "{{ input.complexity }}"
     task_id: "{{ input.task_id }}"
+    campaign: agentic-docs-ab-eval
+    campaign_date: "2026-07-24"
+    claude_code_version: "2.1.218"
+    platform: darwin
   params:
     condition: baseline
     model: claude-opus-4-6
     effort: high
     parallelism: "2"
+    pinned_sha_cm: 849995ea92d1a795c72fb1ea2f266ee147ded275
+    pinned_sha_mto: 21943765a028587358bcec768bb81fd9979c9a83
+    has_claude_md_cm: "false"
+    has_claude_md_mto: "true"
+    docs_quality_score_cm: "85"
+    docs_quality_score_mto: "84"
 
 traces:
   stdout: true
@@ -92,18 +102,38 @@ judges:
   - name: efficiency
     description: Did the agent complete the task without excessive turns or cost?
     check: |
-      # outputs contains per-run totals (all cases combined)
-      turns = outputs.get("num_turns", 999)
-      cost = outputs.get("cost_usd", 999.0)
-      if turns > 200 or cost > 15.0:
+      # Use per-case run_result.json — run-level data doesn't exist at judge time
+      import json
+      from pathlib import Path
+      result_path = Path(outputs.get("case_dir", "")) / "run_result.json"
+      if not result_path.exists():
+          return False, "No per-case result data"
+      with open(result_path) as f:
+          result = json.load(f)
+      turns = result.get("num_turns", 999)
+      cost = result.get("cost_usd", 99.0)
+      if turns > 50 or cost > 3.00:
           return False, f"Excessive: {turns} turns, ${cost:.2f}"
       return True, f"Efficient: {turns} turns, ${cost:.2f}"
 
   - name: consulted_docs
     builtin: consulted_docs
     arguments:
-      min_coverage: 0.0
+      min_coverage: 0.0  # baseline repos have no agentic docs; any consultation passes
       match: suffix
+
+hooks:
+  before_all:
+    - command: |
+        actual=$(git -C repos/cert-manager-operator-baseline rev-parse HEAD)
+        expected=849995ea92d1a795c72fb1ea2f266ee147ded275
+        [ "$actual" = "$expected" ] || (echo "SHA mismatch cm: $actual != $expected" && exit 1)
+        actual=$(git -C repos/multiarch-tuning-operator-baseline rev-parse HEAD)
+        expected=21943765a028587358bcec768bb81fd9979c9a83
+        [ "$actual" = "$expected" ] || (echo "SHA mismatch mto: $actual != $expected" && exit 1)
+        echo "SHA validation passed"
+      description: Validate repo SHAs match pinned versions
+      on_failure: fail
 
 thresholds:
   task_success:

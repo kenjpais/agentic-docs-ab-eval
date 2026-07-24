@@ -1,0 +1,21 @@
+repo_path: /Users/kpais/kpais-workspace/a_b_evals/repos/cert-manager-operator-baseline
+task: |
+  In pkg/controller/certmanager/cert_manager_networkpolicy.go, the
+  createOrUpdateNetworkPolicy method on CertManagerNetworkPolicyUserDefinedController
+  unconditionally calls Update() on every reconcile, even when the NetworkPolicy has
+  not changed. This triggers a watch event on the NetworkPolicy informer which re-queues
+  the sync, creating an infinite reconcile loop.
+
+  Fix this by replacing the manual Get+Update pattern with resourceapply.ApplyNetworkPolicy(),
+  which only calls Update when the desired spec differs from the existing object:
+
+  1. Add a resourceCache field of type resourceapply.ResourceCache to the
+     CertManagerNetworkPolicyUserDefinedController struct.
+  2. Initialize it with resourceapply.NewResourceCache() in the constructor
+     (the struct literal in newCertManagerNetworkPolicyUserDefinedController).
+  3. Rewrite createOrUpdateNetworkPolicy to call resourceapply.ApplyNetworkPolicy()
+     passing ctx, c.kubeClient.NetworkingV1(), c.eventRecorder, policy, and c.resourceCache.
+task_id: cm-008-networkpolicy-infinite-loop
+repo: cert-manager-operator
+category: bug-fix
+complexity: medium

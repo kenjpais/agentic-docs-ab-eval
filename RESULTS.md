@@ -115,4 +115,4 @@ that directionally supports the hypothesis.
 
 ---
 
-*Full data: metrics.csv · Environment: REPRO_MANIFEST.yaml*
+*Full data: metrics.csv · Environment and reproduction: README.md*

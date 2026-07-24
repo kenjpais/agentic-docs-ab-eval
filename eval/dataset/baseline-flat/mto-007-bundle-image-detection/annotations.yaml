@@ -1,0 +1,12 @@
+repo: multiarch-tuning-operator
+category: bug-fix
+complexity: low
+expected_files: []
+notes: >
+  The fix requires: (1) adding 7 string constants, (2) a var block with a sets.Set
+  containing all 7, (3) an isBundleImage(ociv1.ImageConfig) bool helper that checks
+  the set, (4) replacing the inline map lookup in GetCompatibleArchitecturesSet with
+  a call to isBundleImage. The ociv1 package alias is already imported. The k8s.io/apimachinery
+  sets package is also already used in the file. [Baseline condition: no agentic docs
+  present in this repo clone.]
+reference: reference.md

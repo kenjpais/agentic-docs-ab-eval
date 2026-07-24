@@ -1,0 +1,13 @@
+repo: cert-manager-operator
+category: bug-fix
+complexity: low
+expected_files:
+  - AGENTS.md
+  - agentic/DEVELOPMENT.md
+notes: >
+  The upstreamACMESolverImage constant ("quay.io/jetstack/cert-manager-acmesolver") and
+  certmanagerControllerDeployment constant ("cert-manager") are both defined in the same
+  package (deployment_overrides.go and common.go respectively). The fix is a 2-line change
+  inside the withOperandImageOverrideHook function. DEVELOPMENT.md documents the operand
+  image override hook pattern.
+reference: reference.md

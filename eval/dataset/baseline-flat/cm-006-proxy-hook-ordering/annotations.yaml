@@ -1,0 +1,11 @@
+repo: cert-manager-operator
+category: bug-fix
+complexity: low
+expected_files: []
+notes: >
+  The mergeContainerEnvs function treats its second argument as the override (second
+  wins on conflict). Hooks in the slice run in order, so the last hook to touch env
+  vars wins. The fix is to place withProxyEnv before withContainerEnvOverrideHook so
+  user-specified overrides always take precedence. [Baseline condition: no agentic docs
+  present in this repo clone.]
+reference: reference.md

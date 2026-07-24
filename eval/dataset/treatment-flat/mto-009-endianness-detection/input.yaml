@@ -1,0 +1,27 @@
+repo_path: /Users/kpais/kpais-workspace/a_b_evals/repos/multiarch-tuning-operator-treatment
+task: |
+  In the tracepoint package (internal/controller/enoexecevent/daemon/internal/tracepoint/tracepoint.go),
+  the endianness detection in processRecord is a constant expression that always evaluates
+  to LittleEndian:
+
+    var order binary.ByteOrder = binary.LittleEndian
+    if binary.LittleEndian.Uint16([]byte{1, 0}) != 1 {
+        order = binary.BigEndian
+    }
+
+  binary.LittleEndian.Uint16([]byte{1, 0}) always returns 1, so the condition is always
+  false and order is always LittleEndian. This means the tracepoint daemon misreads TGID
+  values on big-endian architectures (s390x, ppc64le).
+
+  Fix this by:
+  1. Adding an order binary.ByteOrder field to the Tracepoint struct.
+  2. In NewTracepoint(), detecting endianness at runtime using an unsafe.Pointer cast:
+     declare a uint16 variable set to 0x0001, cast it to *[2]byte via unsafe.Pointer,
+     and check if byte[0] == 0x00 (big endian) or byte[0] == 0x01 (little endian).
+     Store the result in the Tracepoint struct.
+  3. In processRecord, use tp.order instead of the local variable, and use uint32
+     instead of int32 for the TGID values.
+task_id: mto-009-endianness-detection
+repo: multiarch-tuning-operator
+category: bug-fix
+complexity: medium

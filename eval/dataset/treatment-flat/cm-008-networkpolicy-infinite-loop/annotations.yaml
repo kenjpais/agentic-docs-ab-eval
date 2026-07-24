@@ -1,0 +1,14 @@
+repo: cert-manager-operator
+category: bug-fix
+complexity: medium
+expected_files:
+  - AGENTS.md
+  - agentic/DESIGN.md
+  - agentic/DEVELOPMENT.md
+notes: >
+  resourceapply.ApplyNetworkPolicy() uses a content diff and only calls Update when
+  something changed. Without it, every sync triggers an Update which fires a watch event
+  that re-queues sync — an infinite loop. DESIGN.md explains the controller reconcile
+  pattern and why idempotent apply is required. DEVELOPMENT.md covers the resourceapply
+  library usage.
+reference: reference.md

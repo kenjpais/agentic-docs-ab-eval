@@ -1,0 +1,19 @@
+repo_path: /Users/kpais/kpais-workspace/a_b_evals/repos/cert-manager-operator-baseline
+task: |
+  In pkg/controller/certmanager/deployment_overrides.go, the withOperandImageOverrideHook
+  function appends an --acme-http01-solver-image argument to the cert-manager controller
+  deployment. There are two bugs:
+
+  1. The deployment name check uses the wrong constant (certmanagerCAinjectorDeployment
+     instead of certmanagerControllerDeployment), so the arg is appended to the wrong
+     deployment.
+  2. The image value uses the container's own image (deployment.Spec.Template.Spec.Containers[0].Image)
+     instead of the upstreamACMESolverImage constant, so the solver image is set to
+     the controller's image rather than the dedicated ACME solver image.
+
+  Fix both bugs: use certmanagerControllerDeployment for the deployment name guard, and
+  wrap upstreamACMESolverImage with certManagerImage() for the image value.
+task_id: cm-007-acme-solver-image
+repo: cert-manager-operator
+category: bug-fix
+complexity: low

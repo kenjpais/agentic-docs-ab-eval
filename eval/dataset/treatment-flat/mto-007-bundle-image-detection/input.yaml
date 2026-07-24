@@ -1,0 +1,23 @@
+repo_path: /Users/kpais/kpais-workspace/a_b_evals/repos/multiarch-tuning-operator-treatment
+task: |
+  In pkg/image/inspector.go, the GetCompatibleArchitecturesSet function detects operator
+  bundle images by checking a single label (operators.operatorframework.io.metrics.builder).
+  However, operator bundles can use any of 7 known operator-sdk annotations, and checking
+  only one means most bundle images are not recognized.
+
+  Expand the detection to cover all 7 operator-sdk bundle annotations:
+  - operators.operatorframework.io.metrics.builder
+  - operators.operatorframework.io.bundle.mediatype.v1
+  - operators.operatorframework.io.bundle.manifests.v1
+  - operators.operatorframework.io.bundle.metadata.v1
+  - operators.operatorframework.io.bundle.package.v1
+  - operators.operatorframework.io.bundle.channels.v1
+  - operators.operatorframework.io.bundle.channel.default.v1
+
+  Define constants for all 7 annotations, store them in a sets.Set[string], and extract
+  an isBundleImage(image ociv1.ImageConfig) bool helper that iterates the image's labels
+  and returns true if any label is in the set. Call isBundleImage from GetCompatibleArchitecturesSet.
+task_id: mto-007-bundle-image-detection
+repo: multiarch-tuning-operator
+category: bug-fix
+complexity: low

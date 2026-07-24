@@ -1,0 +1,13 @@
+repo: multiarch-tuning-operator
+category: bug-fix
+complexity: low
+expected_files:
+  - AGENTS.md
+  - agentic/DEVELOPMENT.md
+notes: >
+  The fix requires: (1) adding 7 string constants, (2) a var block with a sets.Set
+  containing all 7, (3) an isBundleImage(ociv1.ImageConfig) bool helper that checks
+  the set, (4) replacing the inline map lookup in GetCompatibleArchitecturesSet with
+  a call to isBundleImage. DEVELOPMENT.md documents the image inspector package
+  conventions and where bundle detection logic lives.
+reference: reference.md

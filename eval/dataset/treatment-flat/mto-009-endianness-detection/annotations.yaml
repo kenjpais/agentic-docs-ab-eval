@@ -1,0 +1,14 @@
+repo: multiarch-tuning-operator
+category: bug-fix
+complexity: medium
+expected_files:
+  - AGENTS.md
+  - agentic/DESIGN.md
+  - agentic/RELIABILITY.md
+notes: >
+  The key insight is that binary.LittleEndian.Uint16([]byte{1, 0}) is a constant
+  expression (always returns 1) not a runtime check. The fix uses unsafe.Pointer to
+  read the in-memory byte layout of a uint16 variable. DESIGN.md covers the tracepoint
+  architecture. RELIABILITY.md documents multi-arch support requirements including
+  s390x/ppc64le big-endian handling.
+reference: reference.md

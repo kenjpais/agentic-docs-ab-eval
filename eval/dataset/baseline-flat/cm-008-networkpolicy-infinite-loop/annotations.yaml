@@ -1,0 +1,12 @@
+repo: cert-manager-operator
+category: bug-fix
+complexity: medium
+expected_files: []
+notes: >
+  resourceapply.ApplyNetworkPolicy() uses a content diff — it only calls Update when
+  the desired spec differs from existing. Without it, every sync triggers an Update,
+  which fires a NetworkPolicy watch event, which re-queues sync, creating a tight loop.
+  The ResourceCache avoids redundant API reads by caching last-applied state. The import
+  for library-go's resourceapply package should already be in the file. [Baseline
+  condition: no agentic docs present in this repo clone.]
+reference: reference.md

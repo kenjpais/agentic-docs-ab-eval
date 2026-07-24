@@ -97,16 +97,25 @@ for i in $(seq 1 "$RUNS"); do
   echo "  /eval-run --config eval-baseline.yaml --run-id baseline-run-$i"
 done
 echo ""
-echo "Step 2: Run treatment condition ($RUNS times)"
+echo "Step 2: Run treatment-v1 condition ($RUNS times)"
 for i in $(seq 1 "$RUNS"); do
   echo "  /eval-run --config eval-treatment.yaml --run-id treatment-run-$i"
 done
 echo ""
-echo "Step 3: Sync results to MLflow"
-echo "  /eval-mlflow --experiment agentic-docs-ab-eval"
+echo "Step 3: Run treatment-v2 condition ($RUNS times)"
+for i in $(seq 1 "$RUNS"); do
+  echo "  /eval-run --config eval-treatment-v2.yaml --run-id treatment-v2-run-$i"
+done
 echo ""
-echo "Step 4: Human review of edge cases"
-echo "  /eval-review --run-id treatment-run-1"
+echo "Step 4: Sync results to MLflow (run for each run-id)"
+for i in $(seq 1 "$RUNS"); do
+  echo "  /eval-mlflow --action log-results --run-id baseline-run-$i --config eval-baseline.yaml"
+  echo "  /eval-mlflow --action log-results --run-id treatment-run-$i --config eval-treatment.yaml"
+  echo "  /eval-mlflow --action log-results --run-id treatment-v2-run-$i --config eval-treatment-v2.yaml"
+done
+echo ""
+echo "Step 5: Human review of edge cases"
+echo "  /eval-review --run-id treatment-v2-run-1"
 echo ""
 
 # ---------------------------------------------------------------------------

@@ -1,0 +1,11 @@
+repo: multiarch-tuning-operator
+category: bug-fix
+complexity: medium
+expected_files: []
+notes: >
+  Key insight: strings.LastIndex(namePart, ":") > strings.LastIndex(namePart, "/")
+  means the colon is after the last slash, i.e. it's a tag colon. If lastColon <=
+  lastSlash the colon is part of a registry:port and must not be stripped. The
+  strings.Index(imageName, "@sha") approach also handles non-sha256 digest algorithms.
+  [Baseline condition: no agentic docs present in this repo clone.]
+reference: reference.md

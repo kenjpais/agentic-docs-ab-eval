@@ -1,0 +1,13 @@
+repo: multiarch-tuning-operator
+category: bug-fix
+complexity: medium
+expected_files: []
+notes: >
+  The key insight is that binary.LittleEndian.Uint16([]byte{1, 0}) is a constant
+  expression (always returns 1) not a runtime check. The fix uses unsafe.Pointer to
+  read the in-memory byte layout of a uint16 variable — if the low byte is 0x01 it's
+  little-endian, if 0x00 it's big-endian. The order is computed once in NewTracepoint
+  and stored in the struct. Also note the type change from int32 to uint32 for TGID
+  values to match the getPodContainerUUIDFor signature. [Baseline condition: no agentic
+  docs present in this repo clone.]
+reference: reference.md
