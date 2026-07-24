@@ -5,6 +5,9 @@ repos/
 mlflow.db
 mlruns/
 
+# Raw metrics export — kept locally, not in repo
+metrics.csv
+
 # Per-case agent transcripts — large and sensitive
 eval/runs/*/cases/
 
