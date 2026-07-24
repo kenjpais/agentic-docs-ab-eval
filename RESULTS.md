@@ -11,7 +11,7 @@ Kubernetes operator tasks beyond a CLAUDE.md-only baseline?
 
 ---
 
-## Verdict: No clear improvement detected
+## Verdict:
 
 Neither treatment condition produced a meaningful lift over baseline. Treatment-v2 (guided
 discovery) performed directionally better than treatment-v1, but absolute scores were
