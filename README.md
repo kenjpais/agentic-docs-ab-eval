@@ -1,6 +1,6 @@
 # Agentic Documentation A/B Evaluation
 
-Does adding generated agentic documentation (AGENTS.md + `agentic/` tree) improve AI coding agent performance on Kubernetes operator tasks?
+Does adding generated agentic documentation (AGENTS.md + `agentic/` tree) improve AI coding agent performance on coding tasks?
 
 ## Conditions
 
