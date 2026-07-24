@@ -10,7 +10,7 @@ Does adding generated agentic documentation (AGENTS.md + `agentic/` tree) improv
 | Treatment-v1 | Agentic docs present, no explicit read instruction |
 | Treatment-v2 | Agentic docs present + AGENTS.md read instruction in system prompt |
 
-## Scores (task_success, 1–5)
+## Recent Scores (task_success, 1–5)
 
 | Condition | Mean |
 |-----------|------|
