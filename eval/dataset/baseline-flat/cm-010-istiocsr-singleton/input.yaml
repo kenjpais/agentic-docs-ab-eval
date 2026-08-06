@@ -1,0 +1,31 @@
+repo_path: /Users/kpais/kpais-workspace/a_b_evals/repos/cert-manager-operator-baseline
+task: |
+  In pkg/controller/istiocsr/utils.go, the disallowMultipleIstioCSRInstances function
+  enforces that only one IstioCSR instance is active in the cluster at a time. When multiple
+  IstioCSRs exist, the function rejects newer ones in favor of the oldest.
+
+  There is a bug in the conflict detection loop (around line 515):
+
+    for _, item := range istiocsrList.Items {
+        if item.GetNamespace() == istiocsr.Namespace {
+            continue
+        }
+        ...
+    }
+
+  The condition skips every item whose namespace matches the current IstioCSR's namespace,
+  not just the current instance itself. If two IstioCSRs exist in the same namespace (for
+  example, cert-manager/istiocsr-a and cert-manager/istiocsr-b), both are skipped when
+  processing either instance. ignoreProcessing remains false, and both instances proceed with
+  reconciliation simultaneously, violating the singleton requirement.
+
+  Fix the skip condition to exclude only the current IstioCSR (matching both namespace and
+  name), so that a same-namespace duplicate is correctly treated as a conflict:
+
+    if item.GetNamespace() == istiocsr.Namespace && item.GetName() == istiocsr.Name {
+        continue
+    }
+task_id: cm-010-istiocsr-singleton
+repo: cert-manager-operator
+category: bug-fix
+complexity: easy

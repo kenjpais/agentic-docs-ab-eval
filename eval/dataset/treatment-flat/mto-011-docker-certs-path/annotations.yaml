@@ -1,0 +1,16 @@
+repo: multiarch-tuning-operator
+category: bug-fix
+complexity: easy
+expected_files:
+  - AGENTS.md
+  - agentic/DESIGN.md
+  - agentic/RELIABILITY.md
+notes: >
+  Two fixes in the "docker-conf" volume definition in buildControllerDeployment:
+  (1) Path "/etc/docker/" -> "/etc/docker/certs.d/" because Docker reads per-registry
+  certificates from that subdirectory, and the inspector sets DockerPerHostCertDirPath
+  to the value of DOCKER_CERTS_DIR env var which must point at the certs.d directory;
+  (2) HostPathDirectory -> HostPathDirectoryOrCreate because nodes without custom Docker
+  cert configuration do not pre-create /etc/docker/certs.d/, so HostPathDirectory would
+  fail pod startup. The corresponding VolumeMount MountPath must also be updated.
+reference: reference.md

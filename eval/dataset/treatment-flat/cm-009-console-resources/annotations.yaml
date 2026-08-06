@@ -1,0 +1,15 @@
+repo: cert-manager-operator
+category: bug-fix
+complexity: medium
+expected_files:
+  - AGENTS.md
+  - agentic/DESIGN.md
+  - agentic/DEVELOPMENT.md
+notes: >
+  The fix requires understanding the InitInformerIfAvailable/OptionalInformer pattern
+  (pkg/operator/utils/apidiscovery.go) and the staticresourcecontroller.WithConditionalResources
+  chaining pattern (visible in NewCertManagerNetworkPolicyStaticResourcesController).
+  The new controller mirrors the network policy static resource controller but gates
+  on console.openshift.io API availability rather than a CertManager spec field.
+  CertManagerControllerSet must be updated to carry the new controller.
+reference: reference.md

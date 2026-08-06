@@ -1,0 +1,44 @@
+repo_path: /Users/kpais/kpais-workspace/a_b_evals/repos/cert-manager-operator-baseline
+task: |
+  The cert-manager-operator ships console resources (ConsoleYAMLSample and ConsoleQuickStart
+  objects) that display YAML examples in the OpenShift Console UI. These resources use the
+  console.openshift.io/v1 API group. On consoleless clusters (RAN/SNO/RDS profiles), this
+  API group is absent, so attempting to create these resources fails.
+
+  The fix is a conditional console resources controller that only applies the console assets
+  when console.openshift.io is available. Implement the following three changes:
+
+  1. In pkg/operator/starter.go, after the Infrastructure API discovery block, add a Console
+     API discovery check. Use utils.NewResourceDiscoverer with GVR
+     consolev1.GroupVersion.WithResource("consoleyamlsamples") and call .Discover() to
+     get a bool (consoleDiscovered). Import consolev1 "github.com/openshift/api/console/v1".
+     Pass consoleDiscovered to NewCertManagerControllerSet.
+
+  2. Create pkg/controller/certmanager/console_resources.go with:
+     - const certManagerConsoleResourcesControllerName = operatorName + "-console-resources"
+     - var certManagerConsoleAssetFiles = []string{
+         "consoles/cert-manager-acme-issuer-sample.yaml",
+         "consoles/cert-manager-certificate-sample.yaml",
+         "consoles/cert-manager-example-quickstart.yaml",
+         "consoles/cert-manager-issuer-sample.yaml",
+       }
+     - func NewCertManagerConsoleResourcesController(operatorClient v1helpers.OperatorClient,
+         kubeClientContainer *resourceapply.ClientHolder, consoleApplicable bool,
+         eventsRecorder events.Recorder) factory.Controller
+       The function calls staticresourcecontroller.NewStaticResourceController with empty
+       initial files, then chains .WithConditionalResources(assets.Asset,
+       certManagerConsoleAssetFiles, func() bool { return consoleApplicable }, nil).
+
+  3. In pkg/controller/certmanager/cert_manager_controller_set.go:
+     - Add field certManagerConsoleResourcesController factory.Controller to the struct.
+     - Add parameter consoleApplicable bool to NewCertManagerControllerSet.
+     - Initialize certManagerConsoleResourcesController with NewCertManagerConsoleResourcesController.
+     - Include it in the ToArray() slice.
+
+  Note: The console YAML files from config/console/ must be embedded in
+  pkg/operator/assets/bindata.go (under bindata/consoles/) before the controller can be
+  deployed; running "make bindata" handles that, but is outside the scope of this task.
+task_id: cm-009-console-resources
+repo: cert-manager-operator
+category: bug-fix
+complexity: medium

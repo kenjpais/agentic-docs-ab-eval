@@ -1,0 +1,12 @@
+repo: multiarch-tuning-operator
+category: bug-fix
+complexity: easy
+expected_files: []
+notes: >
+  The fix replaces fnv.New128() with sha256.New() and inserts a null byte separator
+  between imageReference and secrets. The null byte prevents length-extension boundary
+  confusion (hash("a"+"bc") != hash("ab"+"c")). SHA-256 is collision-resistant whereas
+  FNV-128 is not, eliminating the risk of two distinct (image, secret) pairs sharing a
+  cache entry and returning wrong architecture data. Import "hash/fnv" is removed and
+  "crypto/sha256" is added. [Baseline condition: no agentic docs present in this repo clone.]
+reference: reference.md

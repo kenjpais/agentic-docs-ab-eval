@@ -1,0 +1,39 @@
+repo_path: /Users/kpais/kpais-workspace/a_b_evals/repos/multiarch-tuning-operator-baseline
+task: |
+  In internal/controller/operator/podplacement_objects.go, the buildControllerDeployment
+  function creates host-path volumes for the pod placement controller. The "docker-conf"
+  volume mounts the Docker certificate directory:
+
+    {
+        Name: "docker-conf",
+        VolumeSource: corev1.VolumeSource{
+            HostPath: &corev1.HostPathVolumeSource{
+                Path: "/etc/docker/",
+                Type: utils.NewPtr(corev1.HostPathDirectory),
+            },
+        },
+    }
+
+  This has two bugs:
+
+  1. Wrong path: Docker stores per-registry TLS certificates in /etc/docker/certs.d/, not
+     /etc/docker/. The image inspector sets sys.DockerPerHostCertDirPath to the path exposed
+     by this volume mount. With the wrong path, custom registry certificates are not found,
+     causing image inspection to fail against registries that use self-signed or private CA
+     certificates.
+
+  2. Wrong HostPath type: HostPathDirectory requires the directory to pre-exist on every
+     node. Nodes without custom Docker certificate directories may not have /etc/docker/certs.d/
+     at all, so pods fail to start with a "hostPath type check failed" error. The correct type
+     is HostPathDirectoryOrCreate, which creates the directory if absent.
+
+  Fix both issues in the "docker-conf" volume definition:
+  - Change Path from "/etc/docker/" to "/etc/docker/certs.d/"
+  - Change Type from corev1.HostPathDirectory to corev1.HostPathDirectoryOrCreate
+
+  Also update the corresponding VolumeMount MountPath from "/etc/docker/" to
+  "/etc/docker/certs.d/" so the mount path matches the volume path.
+task_id: mto-011-docker-certs-path
+repo: multiarch-tuning-operator
+category: bug-fix
+complexity: easy

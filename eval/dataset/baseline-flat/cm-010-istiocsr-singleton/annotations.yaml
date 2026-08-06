@@ -1,0 +1,12 @@
+repo: cert-manager-operator
+category: bug-fix
+complexity: easy
+expected_files: []
+notes: >
+  The fix is a one-line change: add && item.GetName() == istiocsr.Name to the skip
+  condition in the disallowMultipleIstioCSRInstances loop. Without it, two IstioCSRs
+  in the same namespace both bypass the singleton check and are reconciled simultaneously.
+  The correct behaviour is to skip only the current instance (matched by namespace AND name)
+  and compare all other instances — same-namespace or cross-namespace — for conflict
+  detection. [Baseline condition: no agentic docs present in this repo clone.]
+reference: reference.md
